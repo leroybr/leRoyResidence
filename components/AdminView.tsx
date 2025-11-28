@@ -8,9 +8,16 @@ interface AdminViewProps {
   onCancel: () => void;
 }
 
+const COMMON_AMENITIES = [
+  'Seguridad 24/7', 'Piscina Privada', 'Piscina Temperada', 'Quincho / BBQ', 
+  'Jardines', 'Estacionamiento', 'Vista Panorámica', 'Calefacción Central', 
+  'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
+];
+
 const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
   // Public Data State
   const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [location, setLocation] = useState(COMMUNES[0]);
   const [price, setPrice] = useState<number>(0);
   const [currency, setCurrency] = useState('UF'); // Default to UF
@@ -20,6 +27,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
   const [area, setArea] = useState(0);
   const [imageUrl, setImageUrl] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [isPremium, setIsPremium] = useState(false); // New state for Premium flag
 
   // Private Data State
   const [ownerName, setOwnerName] = useState('');
@@ -27,21 +36,32 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
   const [legalDescription, setLegalDescription] = useState('');
   const [privateNotes, setPrivateNotes] = useState('');
 
+  const toggleAmenity = (amenity: string) => {
+    if (selectedAmenities.includes(amenity)) {
+      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
+    } else {
+      setSelectedAmenities([...selectedAmenities, amenity]);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const newProperty: Property = {
       id: `custom-${Date.now()}`,
       title,
-      location: `${location}, Chile`, // Appending country for consistency
+      subtitle: subtitle || title, // Fallback if empty
+      location: `${location}, Chile`,
       price,
       currency,
       type,
       bedrooms,
       bathrooms,
       area,
-      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', // Default fallback
+      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
       description,
+      amenities: selectedAmenities,
+      isPremium, // Include flag
       privateData: {
         ownerName,
         ownerPhone,
@@ -68,14 +88,36 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
           
           {/* Public Data Section */}
           <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-            <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold mb-6 border-b pb-2">
-              Datos Públicos (Ficha Web)
-            </h2>
+            <div className="flex justify-between items-center border-b pb-2 mb-6">
+                <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold">
+                Datos Públicos (Visible en Web)
+                </h2>
+                
+                {/* Premium Toggle */}
+                <label className="flex items-center space-x-3 cursor-pointer select-none">
+                    <span className="text-xs font-bold uppercase tracking-widest text-leroy-black">Clasificación Premium</span>
+                    <div className="relative">
+                        <input 
+                            type="checkbox" 
+                            checked={isPremium} 
+                            onChange={(e) => setIsPremium(e.target.checked)} 
+                            className="sr-only peer" 
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-leroy-gold"></div>
+                    </div>
+                </label>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="col-span-2">
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Título de la Publicación</label>
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Título Principal</label>
                 <input required type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" placeholder="Ej: Espectacular Casa en El Venado" />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Subtítulo / Bajada (Estilo Elegante)</label>
+                <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" placeholder="Ej: Propiedad heredada poco común en las fincas..." />
+                <p className="text-[10px] text-gray-400 mt-1">Este texto aparecerá debajo del precio en letra cursiva elegante.</p>
               </div>
 
               <div>
@@ -93,7 +135,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Precio (Valor)</label>
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Precio</label>
                 <input required type="number" min="0" value={price} onChange={e => setPrice(Number(e.target.value))} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" />
               </div>
 
@@ -128,8 +170,25 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
               </div>
 
               <div className="col-span-2">
-                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Descripción Pública</label>
-                <textarea required rows={4} value={description} onChange={e => setDescription(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" placeholder="Detalles atractivos para el cliente..."></textarea>
+                <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Descripción Detallada</label>
+                <textarea required rows={5} value={description} onChange={e => setDescription(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" placeholder="Describa la propiedad, el entorno y los detalles de lujo..."></textarea>
+              </div>
+
+              <div className="col-span-2">
+                 <label className="block text-xs font-bold uppercase text-gray-500 mb-3">Comodidades / Amenities</label>
+                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {COMMON_AMENITIES.map(amenity => (
+                      <label key={amenity} className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={selectedAmenities.includes(amenity)}
+                          onChange={() => toggleAmenity(amenity)}
+                          className="rounded text-leroy-black focus:ring-0" 
+                        />
+                        <span>{amenity}</span>
+                      </label>
+                    ))}
+                 </div>
               </div>
             </div>
           </div>
@@ -140,7 +199,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
               Confidencial
             </div>
             <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-red-800 mb-6 border-b border-red-200 pb-2">
-              Datos Privados (Interno)
+              Datos Privados (Uso Interno)
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

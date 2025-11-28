@@ -18,6 +18,7 @@ export interface PrivateData {
 export interface Property {
   id: string;
   title: string;
+  subtitle?: string; // Short elegant description
   location: string;
   price: number;
   currency: string;
@@ -27,6 +28,8 @@ export interface Property {
   area: number; // in sq meters
   type: PropertyType;
   description: string;
+  amenities?: string[]; // List of features
+  isPremium?: boolean; // New: Manual flag for Premium classification
   privateData?: PrivateData; // Optional field for admin use only
 }
 

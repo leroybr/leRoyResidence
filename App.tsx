@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -6,11 +7,12 @@ import PropertyCard from './components/PropertyCard';
 import ListingView from './components/ListingView';
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
+import ShowroomView from './components/ShowroomView';
 import { MOCK_PROPERTIES } from './constants';
 import { Property, HeroSearchState } from './types';
 import { interpretSearchQuery } from './services/geminiService';
 
-type ViewState = 'home' | 'listing' | 'admin' | 'detail';
+type ViewState = 'home' | 'listing' | 'admin' | 'detail' | 'showroom';
 
 const UF_VALUE_CLP = 37800; // Consistent with PropertyCard
 
@@ -34,23 +36,36 @@ const App: React.FC = () => {
   const handleSearch = async (filters: HeroSearchState) => {
     const { location, bedrooms, priceRange } = filters;
 
+    // 1. If nothing selected, go home or stay home
     if (!location && bedrooms === 'any' && priceRange === 'any') {
       handleNavigate('home');
       return;
     }
     
-    setCurrentView('listing');
-    
-    if (location) {
-        setCurrentCategory(location);
-    } else {
-        setCurrentCategory('Búsqueda Filtrada');
+    // 2. Optimization: If ONLY location is selected (no specific beds/price), 
+    // treat it exactly like clicking the city name in the menu.
+    if (location && bedrooms === 'any' && priceRange === 'any') {
+        handleNavigate(location);
+        return;
     }
-    
+
+    // 3. Complex Search (Location + Beds + Price)
+    setCurrentView('listing');
     setIsSearching(true);
+
+    // Create a readable title for the results page
+    let titleParts = [];
+    if (location) titleParts.push(location);
+    if (bedrooms !== 'any') titleParts.push(`${bedrooms}+ Dorm`);
+    if (priceRange !== 'any') titleParts.push('Precio Filtrado');
+    
+    // Set the category title to the search terms
+    const searchTitle = titleParts.length > 0 ? titleParts.join(', ') : 'Resultados de Búsqueda';
+    setCurrentCategory(searchTitle);
 
     let filtered = properties;
 
+    // Filter by Location
     if (location.trim()) {
         filtered = filtered.filter(p => 
             p.location.toLowerCase().includes(location.toLowerCase()) ||
@@ -58,11 +73,13 @@ const App: React.FC = () => {
         );
     }
 
+    // Filter by Bedrooms
     if (bedrooms !== 'any') {
         const minBeds = parseInt(bedrooms);
         filtered = filtered.filter(p => p.bedrooms >= minBeds);
     }
 
+    // Filter by Price
     if (priceRange !== 'any') {
         const [minStr, maxStr] = priceRange.split('-');
         let min = parseInt(minStr);
@@ -71,9 +88,11 @@ const App: React.FC = () => {
         filtered = filtered.filter(p => {
             let priceInCLP = 0;
             const currency = p.currency.trim();
+            
+            // Normalize everything to CLP for comparison
             if (currency === 'UF') {
                 priceInCLP = p.price * UF_VALUE_CLP;
-            } else if (currency === '$') {
+            } else if (currency === '$' || currency === 'USD') {
                 priceInCLP = p.price * 950; 
             } else if (currency === '€') {
                 priceInCLP = p.price * 1020; 
@@ -84,6 +103,7 @@ const App: React.FC = () => {
         });
     }
 
+    // (Optional) Gemini AI hook for natural language, not used in structured search
     if (location.split(' ').length > 3) {
          const aiFilters = await interpretSearchQuery(location);
     }
@@ -107,12 +127,24 @@ const App: React.FC = () => {
       return;
     }
 
+    if (pageId === 'showroom_kitchens') {
+      setCurrentView('showroom');
+      return;
+    }
+
     setCurrentView('listing');
     setCurrentCategory(pageId);
 
     if (pageId === 'real_estate' || pageId === 'developments') {
+       // Show all properties or specific ones.
        setDisplayedProperties(properties);
+    } else if (pageId === 'premium') {
+       // Premium Logic: Filter explicitly marked premium properties
+       const filtered = properties.filter(p => p.isPremium);
+       setDisplayedProperties(filtered);
     } else {
+       // It's a location/commune
+       // We filter loosely to match "Concepción" in "Concepción, Chile"
        const filtered = properties.filter(p => 
          p.location.toLowerCase().includes(pageId.toLowerCase())
        );
@@ -142,14 +174,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
-      <Header onNavigate={handleNavigate} currentView={currentView === 'detail' ? 'listing' : currentView} />
+      <Header onNavigate={handleNavigate} currentView={currentView === 'detail' || currentView === 'showroom' ? 'listing' : currentView} />
       
       <main className="flex-grow">
         
         {currentView === 'admin' ? (
           <AdminView onAddProperty={handleAddProperty} onCancel={() => handleNavigate('home')} />
         ) : currentView === 'detail' && selectedProperty ? (
-          <PropertyDetailView property={selectedProperty} />
+          <PropertyDetailView property={selectedProperty} onGoHome={() => handleNavigate('home')} />
+        ) : currentView === 'showroom' ? (
+          <ShowroomView onGoHome={() => handleNavigate('home')} />
         ) : currentView === 'home' ? (
           <>
             <Hero onSearch={handleSearch} isSearching={isSearching} />
@@ -217,6 +251,7 @@ const App: React.FC = () => {
             properties={displayedProperties} 
             onClearFilters={clearFilters}
             onPropertyClick={handlePropertyClick}
+            onGoHome={() => handleNavigate('home')}
           />
         )}
 

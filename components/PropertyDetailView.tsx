@@ -4,6 +4,7 @@ import { Property } from '../types';
 
 interface PropertyDetailViewProps {
   property: Property;
+  onGoHome?: () => void;
 }
 
 const UF_VALUE_CLP = 37800;
@@ -45,16 +46,21 @@ const ADDITIONAL_IMAGES = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop"  // Bedroom
 ];
 
-const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property }) => {
+const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoHome }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   
   // Combine main property image with mock additional images for the gallery
   const galleryImages = [property.imageUrl, ...ADDITIONAL_IMAGES];
 
   const { uf, clp } = getPriceDisplay(property.price, property.currency);
+  
+  // Fallback for amenities if none are provided
+  const amenities = property.amenities && property.amenities.length > 0 
+    ? property.amenities 
+    : ['Seguridad', 'Estacionamiento', 'Jardines'];
 
   return (
-    <div className="pt-28 pb-20 bg-white min-h-screen font-sans relative">
+    <div className="pt-40 pb-20 bg-white min-h-screen font-sans relative">
       
       {/* Styles injected specifically for this component layout */}
       <style>{`
@@ -119,12 +125,105 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property }) => 
           border-radius: 2px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        
+        /* New Contact Box Styles */
+        .contact-container {
+          width: 60%; /* Increased from 50% */
+          border: 2px solid rgb(0, 108, 117);
+          border-radius: 0px;
+          margin-top: 4rem;
+          margin-left: 0;
+          overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+           .contact-container {
+             width: 100%;
+           }
+        }
+
+        .contact-header {
+          background-color: rgb(0, 108, 117);
+          color: white;
+          padding: 1rem;
+          text-align: left;
+        }
+
+        .contact-body {
+          padding: 1.5rem;
+          background-color: white;
+        }
+
+        .teal-input {
+          width: 100%;
+          background-color: white; /* Changed to white */
+          color: black; /* Changed to black */
+          border: 1px solid rgb(0, 108, 117); /* Added border */
+          padding: 10px 12px;
+          font-size: 0.85rem;
+          margin-bottom: 12px;
+          outline: none;
+          border-radius: 0;
+        }
+        
+        .teal-input::placeholder {
+          color: #999;
+        }
+
+        .phone-row {
+           display: flex;
+           margin-bottom: 12px;
+           width: 100%;
+        }
+
+        .phone-prefix {
+           background-color: rgb(0, 108, 117);
+           color: white;
+           padding: 10px 12px;
+           font-size: 0.85rem;
+           border: 1px solid rgb(0, 108, 117);
+           display: flex;
+           align-items: center;
+           white-space: nowrap;
+           font-weight: bold;
+        }
+
+        .teal-btn {
+          width: 100%;
+          background-color: rgb(0, 108, 117);
+          color: white;
+          font-weight: bold;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          padding: 1rem;
+          margin-top: 0.5rem;
+        }
+        
+        .teal-btn:hover {
+           opacity: 0.9;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
       `}</style>
+      
+      {/* 0. Go Home Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+        {onGoHome && (
+          <button 
+            onClick={onGoHome}
+            className="flex items-center text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 mr-2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            Volver a Inicio
+          </button>
+        )}
+      </div>
 
       {/* 1. Header / Breadcrumbs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
@@ -149,8 +248,6 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property }) => 
               {property.location}
             </div>
           </div>
-          
-          {/* Price removed from here - moved below images */}
         </div>
       </div>
 
@@ -171,134 +268,108 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property }) => 
       {/* 3. Price & Subtitle Section (Below Images, Left Aligned) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <div className="flex flex-col items-start">
-          {/* Price: Playfair Display, Semibold (600), ~48px (text-5xl) */}
-          <span className="font-serif font-semibold text-5xl text-leroy-black">
+          {/* Price: Playfair Display, Semibold (600), 48px (text-5xl) */}
+          <div className="flex items-baseline gap-4 mb-4">
+            <span className="font-serif font-semibold text-5xl text-leroy-black">
               {uf}
-          </span>
-          {/* Secondary Price: Manrope (Sans), normal weight */}
-          <span className="text-xl text-gray-500 font-light mt-1 font-sans">
-              {clp}
-          </span>
-          {/* Subtitle / Short Description: Inter, Medium, 19px, #555 */}
-          <p className="font-inter font-medium text-[19px] text-[#555] mt-4 max-w-3xl leading-relaxed">
-            {property.description}
+            </span>
+            <span className="font-sans text-xl text-gray-500 font-normal">
+              ({clp})
+            </span>
+          </div>
+          
+          {/* Subtitle: Prata, Regular (400), 24px - Use the entered subtitle or fallback to title */}
+          <p className="font-prata font-normal text-[24px] text-leroy-black leading-tight max-w-5xl">
+            {property.subtitle || property.title}
           </p>
         </div>
       </div>
 
-      {/* 4. Content Columns */}
+      {/* 4. Main Content (Single Column Flow) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
-          {/* LEFT COLUMN: Details (8 cols) */}
-          <div className="lg:col-span-8">
-            
-            {/* Specs Bar */}
-            <div className="flex flex-wrap border-y border-gray-100 py-6 mb-10 gap-x-12 gap-y-4">
-              <div>
-                <span className="block text-[10px] font-bold uppercase text-gray-400 mb-1 font-sans">Habitaciones</span>
-                {/* Data: Playfair Display, Medium, ~18px (text-lg) */}
-                <span className="text-lg font-medium font-serif text-leroy-black">{property.bedrooms}</span>
-              </div>
-              <div>
-                <span className="block text-[10px] font-bold uppercase text-gray-400 mb-1 font-sans">Baños</span>
-                {/* Data: Playfair Display, Medium, ~18px (text-lg) */}
-                <span className="text-lg font-medium font-serif text-leroy-black">{property.bathrooms}</span>
-              </div>
-              <div>
-                <span className="block text-[10px] font-bold uppercase text-gray-400 mb-1 font-sans">Área Interior</span>
-                {/* Data: Playfair Display, Medium, ~18px (text-lg) */}
-                <span className="text-lg font-medium font-serif text-leroy-black">{property.area} m²</span>
-              </div>
-              <div>
-                <span className="block text-[10px] font-bold uppercase text-gray-400 mb-1 font-sans">Tipo</span>
-                {/* Data: Playfair Display, Medium, ~18px (text-lg) */}
-                <span className="text-lg font-medium font-serif text-leroy-black">{property.type}</span>
-              </div>
+        {/* Specs Bar - UPDATED: Inter 16px Bold Black */}
+        <div className="flex flex-wrap items-center gap-8 py-6 border-y border-gray-100 font-inter text-[16px] font-bold text-black mb-12">
+            <div className="flex items-center gap-2">
+                <span>{property.bedrooms}</span> <span>Dormitorios</span>
             </div>
-
-            {/* Description */}
-            <div className="mb-16">
-              {/* Subtitle: Playfair Display, Regular, ~24px (text-2xl) */}
-              <h2 className="font-serif font-normal text-2xl text-leroy-black mb-6">Sobre esta propiedad</h2>
-              <div className="prose prose-lg text-gray-500 max-w-none leading-relaxed font-sans">
-                {/* Using description again or we could use a longer lorem ipsum for the body to differentiate */}
-                <p>{property.description}</p>
-                <p className="mt-4">
-                  Esta residencia ofrece una combinación inigualable de lujo y privacidad. Diseñada pensando en el confort, 
-                  cada espacio ha sido optimizado para aprovechar la luz natural y las vistas del entorno. Los acabados de alta gama, 
-                  incluyendo mármol importado y maderas nobles, reflejan la calidad de construcción.
-                </p>
-                <p className="mt-4">
-                  Ubicada en {property.location}, los residentes disfrutarán de acceso cercano a servicios exclusivos, 
-                  colegios de prestigio y áreas recreativas, manteniendo siempre la tranquilidad de un barrio residencial consolidado.
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+                <span>{property.bathrooms}</span> <span>Baños</span>
             </div>
-
-            {/* Amenities (Mock) */}
-            <div className="mb-16">
-               {/* Subtitle: Playfair Display, Regular, ~24px (text-2xl) */}
-               <h2 className="font-serif font-normal text-2xl text-leroy-black mb-6">Comodidades</h2>
-               <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4">
-                 {['Piscina Privada', 'Seguridad 24/7', 'Jardines', 'Estacionamiento', 'Quincho / BBQ', 'Calefacción Central', 'Vista Panorámica', 'Cocina Equipada'].map((amenity) => (
-                   <div key={amenity} className="flex items-center text-sm text-gray-600 font-sans">
-                     <svg className="w-4 h-4 mr-2 text-leroy-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                     {amenity}
-                   </div>
-                 ))}
-               </div>
+            <div className="flex items-center gap-2">
+                <span>{property.area}</span> <span>m² (aprox)</span>
             </div>
-
-          </div>
-
-          {/* RIGHT COLUMN: Sticky Sidebar (4 cols) */}
-          <div className="lg:col-span-4">
-            <div className="sticky top-28">
-              <div className="bg-gray-50 p-8 border border-gray-100 rounded-sm shadow-sm">
-                <h3 className="font-serif text-2xl text-leroy-black mb-2">Interesado?</h3>
-                <p className="text-xs text-gray-400 uppercase tracking-widest mb-6 font-sans">Contactar Agente</p>
-                
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden mr-4">
-                     <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Agente" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-leroy-black font-sans">Sarah Jenkins</div>
-                    <div className="text-xs text-gray-500 font-sans">LeRoy Senior Partner</div>
-                  </div>
-                </div>
-
-                <form className="space-y-4 font-sans">
-                  <input type="text" placeholder="Nombre" className="w-full bg-white border border-gray-200 p-3 text-sm focus:border-black outline-none transition-colors" />
-                  <input type="email" placeholder="Email" className="w-full bg-white border border-gray-200 p-3 text-sm focus:border-black outline-none transition-colors" />
-                  <input type="tel" placeholder="Teléfono" className="w-full bg-white border border-gray-200 p-3 text-sm focus:border-black outline-none transition-colors" />
-                  <textarea rows={3} placeholder="Hola, estoy interesado en esta propiedad..." className="w-full bg-white border border-gray-200 p-3 text-sm focus:border-black outline-none transition-colors"></textarea>
-                  
-                  <button className="w-full bg-leroy-black text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors">
-                    Solicitar Información
-                  </button>
-                </form>
-
-                <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-                   <button className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70 flex items-center justify-center w-full font-sans">
-                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
-                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                     </svg>
-                     Llamar Ahora
-                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        {/* Extended Info */}
+        <div className="mb-12">
+            {/* Updated Title: Prata, 28px, Weight 400 */}
+            <h3 className="font-prata text-[28px] mb-4 font-normal text-leroy-black">
+            Sobre esta propiedad
+            </h3>
+            
+            {/* Updated Paragraph: Inter, 14px, RGB 21,21,21 */}
+            <p className="font-inter text-[14px] text-[#151515] leading-relaxed mb-4 max-w-4xl whitespace-pre-wrap">
+            {property.description}
+            </p>
+        </div>
+
+        {/* Amenities Grid */}
+        <div className="mb-12">
+            <h3 className="font-serif text-2xl mb-6 font-normal">Comodidades</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {amenities.map((amenity, i) => (
+                <div key={i} className="flex items-center gap-3 text-gray-600 text-sm">
+                <svg className="w-4 h-4 text-leroy-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                {amenity}
+                </div>
+            ))}
+            </div>
+        </div>
+        
+        {/* 5. Contact Form (Bottom, 60% width, White Inputs/Teal Border) */}
+        <div className="contact-container">
+            <div className="contact-header">
+                <h3>Contacto</h3>
+            </div>
+            <div className="contact-body">
+                <form className="flex flex-col" onSubmit={(e) => e.preventDefault()}>
+                    <input type="text" placeholder="Tu Nombre" className="teal-input" />
+                    <input type="email" placeholder="Tu Email" className="teal-input" />
+                    
+                    {/* Phone Input with Prefix - Aligned in a row */}
+                    <div className="phone-row">
+                        <div className="phone-prefix">+56 9</div>
+                        <input type="tel" placeholder="1234 5678" className="teal-input" style={{ marginBottom: 0, borderLeft: 'none' }} />
+                    </div>
+
+                    <textarea rows={4} placeholder="Me interesa esta propiedad..." className="teal-input resize-none"></textarea>
+                    
+                    <button className="teal-btn">
+                        Enviar Mensaje
+                    </button>
+                    
+                    <p className="text-[10px] text-center text-black mt-3">
+                        Al enviar, aceptas nuestros términos de servicio.
+                    </p>
+                </form>
+            </div>
+        </div>
+
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Modal Overlay */}
       {selectedImage && (
         <div className="modal" onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Vista ampliada" onClick={(e) => e.stopPropagation()} />
+          <img src={selectedImage} alt="Fullscreen View" onClick={(e) => e.stopPropagation()} />
+          <button 
+             onClick={() => setSelectedImage(null)}
+             className="absolute top-6 right-6 text-white hover:text-gray-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
       )}
 

@@ -9,11 +9,11 @@ interface HeroProps {
 }
 
 const HERO_IMAGES = [
-  "https://images.unsplash.com/photo-1512813195386-6cf811ad3542?q=80&w=2070&auto=format&fit=crop", // Cabo San Lucas Style
-  "https://images.unsplash.com/photo-1580587771525-78b9dba3b91d?q=80&w=1974&auto=format&fit=crop", // Tulum Jungle Style
-  "https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=2070&auto=format&fit=crop", // Modern Mexican Villa
-  "https://images.unsplash.com/photo-1599809275372-b7f56fc0fbb0?q=80&w=2070&auto=format&fit=crop", // Hacienda Luxury Style
-  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop"  // Pacific Coast Ocean View
+  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2560&auto=format&fit=crop", // Grand Modern Estate White
+  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2560&auto=format&fit=crop", // Resort Style Luxury Pool
+  "https://images.unsplash.com/photo-1600596542815-2a434f678417?q=80&w=2560&auto=format&fit=crop", // Architectural Clean Lines
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2560&auto=format&fit=crop", // Poolside Luxury
+  "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?q=80&w=2560&auto=format&fit=crop"  // Classic Spanish/Mediterranean
 ];
 
 const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
