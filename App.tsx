@@ -188,6 +188,7 @@ const App: React.FC = () => {
           <>
             <Hero onSearch={handleSearch} isSearching={isSearching} />
 
+            {/* SECCION DESTACADA PARA COMPRADORES */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
               
               <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-100 pb-6">
@@ -196,16 +197,16 @@ const App: React.FC = () => {
                     Propiedades Destacadas
                   </h2>
                   <p className="text-gray-500 font-light">
-                    Una selección curada de las mejores residencias disponibles.
+                    Oportunidades únicas seleccionadas por nuestros expertos.
                   </p>
                 </div>
                 
                 <div className="flex items-center space-x-2 mt-4 md:mt-0">
                    <button 
                      onClick={() => handleNavigate('real_estate')}
-                     className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70"
+                     className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70 transition-opacity"
                    >
-                     Ver todas las propiedades &rarr;
+                     Ver cartera completa &rarr;
                    </button>
                 </div>
               </div>
@@ -220,26 +221,53 @@ const App: React.FC = () => {
 
             </div>
             
+            {/* SECCION ESTRATEGICA: CAPTACION DE PROPIETARIOS (VENDEDORES) */}
+            <section className="bg-leroy-black text-white py-24 relative overflow-hidden">
+               {/* Decorative background element */}
+               <div className="absolute top-0 right-0 w-64 h-64 bg-leroy-gold opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+               
+               <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+                  <span className="text-leroy-gold text-xs font-bold uppercase tracking-[0.2em] mb-4 block">
+                    Gestión de Venta Exclusiva
+                  </span>
+                  <h2 className="font-serif text-3xl md:text-5xl mb-6 leading-tight">
+                    ¿Posee una propiedad extraordinaria?
+                  </h2>
+                  <p className="font-prata text-lg text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
+                    En LeRoy Residence, conectamos su patrimonio con los compradores más exigentes del mundo. 
+                    Confidencialidad absoluta, marketing de clase mundial y una red de contactos inigualable.
+                  </p>
+                  <button className="bg-leroy-gold text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-leroy-black transition-colors duration-300 border border-leroy-gold">
+                    Solicitar Evaluación Privada
+                  </button>
+               </div>
+            </section>
+
+            {/* SECCION LIFESTYLE (REFUERZO DE MARCA) */}
             <section className="bg-gray-50 py-20">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                  <div className="order-2 md:order-1">
+                  <div className="order-2 md:order-1 relative">
+                    <div className="absolute -top-4 -left-4 w-full h-full border-2 border-leroy-black/10 z-0"></div>
                     <img 
                       src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop" 
                       alt="Luxury Living" 
-                      className="w-full h-auto shadow-xl"
+                      className="w-full h-auto shadow-xl relative z-10"
                     />
                   </div>
                   <div className="order-1 md:order-2">
-                    <h3 className="font-serif text-3xl md:text-4xl mb-6">El arte de vivir bien.</h3>
-                    <p className="text-gray-500 leading-relaxed mb-8">
-                      En LeRoy Residence, entendemos que una casa es más que una estructura; es un estilo de vida. 
-                      Nuestro equipo de expertos selecciona meticulosamente cada propiedad para garantizar que cumpla 
-                      con los estándares más exigentes de calidad, ubicación y diseño.
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-2 block">
+                      Filosofía LeRoy
+                    </span>
+                    <h3 className="font-serif text-3xl md:text-4xl mb-6 text-leroy-black">Más que una propiedad, un legado.</h3>
+                    <p className="text-gray-600 leading-relaxed mb-8 font-light">
+                      Entendemos que la compra de una residencia de lujo es una de las decisiones más importantes de su vida. 
+                      No solo vendemos metros cuadrados; entregamos el escenario donde ocurrirán sus mejores momentos.
+                      Permítanos guiarle a casa.
                     </p>
-                    <a href="#" className="inline-block border-b border-leroy-black pb-1 text-sm font-bold uppercase tracking-widest hover:opacity-50 transition-opacity">
-                      Leer nuestra revista
-                    </a>
+                    <button onClick={() => handleNavigate('real_estate')} className="inline-block border-b border-leroy-black pb-1 text-sm font-bold uppercase tracking-widest hover:text-leroy-gold hover:border-leroy-gold transition-colors">
+                      Comenzar la búsqueda
+                    </button>
                   </div>
                 </div>
               </div>
