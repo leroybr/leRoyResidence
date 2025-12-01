@@ -25,12 +25,57 @@ const App: React.FC = () => {
   const [currentCategory, setCurrentCategory] = useState<string>('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
+  // Initialize view from URL query parameters for SEO and sharing
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    const propertyId = params.get('property');
+
+    if (propertyId) {
+       const prop = properties.find(p => p.id === propertyId);
+       if (prop) {
+         setSelectedProperty(prop);
+         setCurrentView('detail');
+       }
+    } else if (page) {
+       handleNavigate(page, false); // false = don't push state again
+    } else {
+       // Default home logic handled by initial state
+    }
+  }, []);
+
   // Sync initial MOCK properties to displayed
   useEffect(() => {
      if (currentView === 'home' && !isSearching) {
         setDisplayedProperties(properties);
      }
   }, [properties, currentView, isSearching]);
+
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = () => {
+       const params = new URLSearchParams(window.location.search);
+       const page = params.get('page');
+       const propertyId = params.get('property');
+       
+       if (propertyId) {
+           const prop = properties.find(p => p.id === propertyId);
+           if (prop) {
+               setSelectedProperty(prop);
+               setCurrentView('detail');
+           }
+       } else if (page) {
+           handleNavigate(page, false);
+       } else {
+           setCurrentView('home');
+           setCurrentCategory('');
+       }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [properties]);
+
 
   const handleSearch = async (filters: HeroSearchState) => {
     const { location, bedrooms, priceRange } = filters;
@@ -51,6 +96,9 @@ const App: React.FC = () => {
     // 3. Complex Search (Location + Beds + Price)
     setCurrentView('listing');
     setIsSearching(true);
+    
+    // Update URL for search results (optional, but good for shareability)
+    // window.history.pushState({}, '', `?search=${encodeURIComponent(location)}`);
 
     // Create a readable title for the results page
     let titleParts = [];
@@ -111,8 +159,13 @@ const App: React.FC = () => {
     setIsSearching(false);
   };
 
-  const handleNavigate = (pageId: string) => {
+  const handleNavigate = (pageId: string, updateUrl = true) => {
     window.scrollTo(0, 0);
+    
+    if (updateUrl) {
+       const url = pageId === 'home' ? '/' : `?page=${encodeURIComponent(pageId)}`;
+       window.history.pushState(null, '', url);
+    }
     
     if (pageId === 'admin') {
       setCurrentView('admin');
@@ -154,6 +207,7 @@ const App: React.FC = () => {
   const handlePropertyClick = (id: string) => {
     const property = properties.find(p => p.id === id);
     if (property) {
+      window.history.pushState(null, '', `?property=${id}`);
       setSelectedProperty(property);
       setCurrentView('detail');
       window.scrollTo(0, 0);
