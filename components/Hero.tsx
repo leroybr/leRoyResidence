@@ -84,26 +84,26 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
 
       {/* Content */}
       <div className="relative z-20 w-full max-w-6xl px-4 text-center">
-        {/* Updated Title: Single Line */}
-        <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white mb-10 leading-tight drop-shadow-2xl whitespace-nowrap overflow-hidden text-ellipsis">
+        {/* Updated Title: Single Line (Responsive Text Size) */}
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-8 md:mb-10 leading-tight drop-shadow-2xl whitespace-normal md:whitespace-nowrap overflow-hidden text-ellipsis px-2">
           Explora las exclusivas propiedades
         </h1>
         
-        {/* Multi-field Search Bar (Pill Style) */}
-        <form onSubmit={handleSubmit} className="relative max-w-3xl mx-auto">
-          <div className="flex items-center bg-white rounded-full shadow-2xl p-1 transition-all duration-300 hover:shadow-white/10">
+        {/* Multi-field Search Bar (Responsive Pill Style) */}
+        <form onSubmit={handleSubmit} className="relative max-w-3xl mx-auto w-full">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-3xl md:rounded-full shadow-2xl p-2 md:p-1 transition-all duration-300 hover:shadow-white/10 gap-2 md:gap-0">
             
             {/* Field 1: Location Dropdown */}
-            <div className="flex-grow flex items-center px-4 py-2 border-r border-gray-200">
-               <div className="text-gray-400 mr-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+            <div className="flex-grow flex items-center px-4 py-3 md:py-2 border-b md:border-b-0 md:border-r border-gray-200">
+               <div className="text-gray-400 mr-2 flex-shrink-0">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 md:w-4 md:h-4">
                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                  </svg>
                </div>
                <select
                  value={location}
                  onChange={(e) => setLocation(e.target.value)}
-                 className="w-full bg-transparent border-none focus:ring-0 text-gray-800 text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none"
+                 className="w-full bg-transparent border-none focus:ring-0 text-gray-800 text-sm md:text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none"
                >
                  <option value="">Ubicación (Cualquiera)</option>
                  {COMMUNES.map((commune) => (
@@ -112,17 +112,17 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
                </select>
             </div>
 
-            {/* Field 2: Bedrooms */}
-            <div className="hidden md:flex flex-shrink-0 items-center px-4 py-2 border-r border-gray-200 w-32">
-               <div className="text-gray-400 mr-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+            {/* Field 2: Bedrooms (Visible on mobile now) */}
+            <div className="flex flex-shrink-0 items-center px-4 py-3 md:py-2 border-b md:border-b-0 md:border-r border-gray-200 md:w-32">
+               <div className="text-gray-400 mr-2 flex-shrink-0">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 md:w-4 md:h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
                  </svg>
                </div>
                <select 
                   value={bedrooms}
                   onChange={(e) => setBedrooms(e.target.value)}
-                  className="bg-transparent border-none focus:ring-0 text-gray-800 text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none w-full"
+                  className="bg-transparent border-none focus:ring-0 text-gray-800 text-sm md:text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none w-full"
                >
                  <option value="any">Dormitorios</option>
                  <option value="1">1+ D</option>
@@ -133,17 +133,17 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
                </select>
             </div>
 
-            {/* Field 3: Price (CLP) */}
-            <div className="hidden md:flex flex-shrink-0 items-center px-4 py-2 w-48">
-               <div className="text-gray-400 mr-2">
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+            {/* Field 3: Price (CLP) (Visible on mobile now) */}
+            <div className="flex flex-shrink-0 items-center px-4 py-3 md:py-2 md:w-48">
+               <div className="text-gray-400 mr-2 flex-shrink-0">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 md:w-4 md:h-4">
                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                  </svg>
                </div>
                <select 
                   value={priceRange}
                   onChange={(e) => setPriceRange(e.target.value)}
-                  className="bg-transparent border-none focus:ring-0 text-gray-800 text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none w-full"
+                  className="bg-transparent border-none focus:ring-0 text-gray-800 text-sm md:text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none w-full"
                >
                  <option value="any">Precio (CLP)</option>
                  <option value="0-100000000">Hasta $100M</option>
@@ -158,7 +158,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
             <button 
               type="submit"
               disabled={isSearching}
-              className="bg-leroy-black text-white px-8 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-50 flex-shrink-0 ml-1"
+              className="bg-leroy-black text-white px-8 py-3.5 md:py-2.5 rounded-full md:rounded-full text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-50 flex-shrink-0 w-full md:w-auto"
             >
               {isSearching ? '...' : 'Buscar'}
             </button>

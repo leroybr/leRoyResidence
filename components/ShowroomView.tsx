@@ -70,11 +70,11 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
   const [showInductionGallery, setShowInductionGallery] = useState(false);
 
   return (
-    <div className="pt-40 pb-20 min-h-screen bg-white font-sans">
+    <div className="pt-24 md:pt-40 pb-20 min-h-screen bg-white font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Navigation Back */}
-        <div className="mb-12">
+        <div className="mb-8 md:mb-12">
           <button 
             onClick={onGoHome}
             className="flex items-center text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black transition-colors"
@@ -87,22 +87,22 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
         </div>
 
         {/* Header Section */}
-        <div className="mb-16 border-b border-gray-100 pb-10">
+        <div className="mb-10 md:mb-16 border-b border-gray-100 pb-8 md:pb-10">
           <span className="text-xs font-bold text-leroy-gold tracking-[0.2em] uppercase mb-4 block">
             Showroom & Tendencias
           </span>
           
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-leroy-black mb-6 leading-tight">
+          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-leroy-black mb-6 leading-tight">
             Nuevas tecnologías en la cocina
           </h1>
           
-          <p className="font-prata text-xl md:text-2xl text-gray-600 max-w-4xl leading-relaxed text-left">
+          <p className="font-prata text-lg md:text-2xl text-gray-600 max-w-4xl leading-relaxed text-left">
             Tu cocina, más eficiente, cómoda, y linda con todos los avances que te contamos.
           </p>
         </div>
 
         {/* Featured Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-y-16">
           {KITCHEN_TRENDS.map((item, index) => {
             const isFirstItem = index === 0;
             const isSecondItem = item.id === 2;
@@ -113,17 +113,17 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                  <article 
                    key={item.id}
                    onClick={() => setShowInductionGallery(true)} 
-                   className="md:col-span-1 border-2 border-leroy-gold bg-gray-50 flex flex-col justify-center items-center p-8 text-center cursor-pointer hover:shadow-xl transition-shadow duration-300 min-h-[400px]"
+                   className="md:col-span-1 border-2 border-leroy-gold bg-gray-50 flex flex-col justify-center items-center p-6 md:p-8 text-center cursor-pointer hover:shadow-xl transition-shadow duration-300 min-h-[350px] md:min-h-[400px]"
                  >
                    <div className="bg-leroy-gold text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest mb-6 animate-pulse">
                      {item.category}
                    </div>
                    
-                   <h3 className="font-serif text-4xl text-leroy-black mb-6 leading-tight">
+                   <h3 className="font-serif text-3xl md:text-4xl text-leroy-black mb-6 leading-tight">
                      {item.title}
                    </h3>
                    
-                   <p className="font-prata text-lg text-gray-600 leading-relaxed mb-8">
+                   <p className="font-prata text-base md:text-lg text-gray-600 leading-relaxed mb-8">
                      {item.description}
                    </p>
 
@@ -139,7 +139,7 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                 return (
                     <article 
                         key={item.id} 
-                        className="group cursor-pointer relative overflow-hidden h-[450px] md:h-full"
+                        className="group cursor-pointer relative overflow-hidden h-[400px] md:h-full"
                     >
                         <img 
                             src={item.image} 
@@ -147,11 +147,11 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         {/* Overlay Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex flex-col justify-end p-8">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex flex-col justify-end p-6 md:p-8">
                             <span className="text-[10px] font-bold uppercase tracking-widest mb-2 text-leroy-gold">
                                 {item.category}
                             </span>
-                            <h3 className="font-serif text-3xl text-white mb-4">
+                            <h3 className="font-serif text-2xl md:text-3xl text-white mb-4">
                                 Inducción Invisible
                             </h3>
                             
@@ -189,7 +189,7 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                   {item.category}
                 </span>
                 
-                <h3 className="font-serif text-2xl text-leroy-black mb-3 group-hover:underline decoration-1 underline-offset-4">
+                <h3 className="font-serif text-xl md:text-2xl text-leroy-black mb-3 group-hover:underline decoration-1 underline-offset-4">
                   {item.title}
                 </h3>
                 
@@ -213,7 +213,7 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
           onClick={() => setShowInductionGallery(false)}
         >
           <div 
-            className="w-full max-w-7xl relative my-8"
+            className="w-full max-w-7xl relative my-4 md:my-8"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -226,11 +226,11 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
               </svg>
             </button>
 
-            {/* Gallery Grid: 3 Images in a Line with Frames */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+            {/* Gallery Grid: Stack on mobile, 3-in-row on PC */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-0 md:px-4 pb-12 md:pb-0">
                {INDUCTION_GALLERY_IMAGES.map((img, idx) => (
-                  <div key={idx} className="bg-white p-4 shadow-2xl border border-gray-100">
-                      <div className="h-[600px] w-full overflow-hidden">
+                  <div key={idx} className="bg-white p-2 md:p-4 shadow-2xl border border-gray-100">
+                      <div className="h-[300px] md:h-[600px] w-full overflow-hidden">
                           <img 
                              src={img} 
                              alt={`Induction Frame ${idx + 1}`} 
