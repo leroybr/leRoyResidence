@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -234,13 +233,54 @@ const App: React.FC = () => {
                     ¿Posee una propiedad extraordinaria?
                   </h2>
                   <p className="font-prata text-lg text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">
-                    En LeRoy Residence, conectamos su patrimonio con los compradores más exigentes del mundo. 
-                    Confidencialidad absoluta, marketing de clase mundial y una red de contactos inigualable.
+                    En LeRoy Residence, sabemos que su propiedad no es solo un inmueble, es un legado. 
+                    Garantizamos confidencialidad absoluta, estrategia de precio experta y acceso a una cartera global de compradores calificados.
                   </p>
-                  <button className="bg-leroy-gold text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-leroy-black transition-colors duration-300 border border-leroy-gold">
-                    Solicitar Evaluación Privada
-                  </button>
+                  <div className="flex flex-col md:flex-row justify-center gap-4">
+                     <button className="bg-leroy-gold text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-leroy-black transition-colors duration-300 border border-leroy-gold">
+                       Solicitar Evaluación Privada
+                     </button>
+                     <button className="bg-transparent text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-colors duration-300 border border-gray-600">
+                       Hable con un Agente
+                     </button>
+                  </div>
                </div>
+            </section>
+
+            {/* SECCION DE CONFIANZA Y ESTADISTICAS (NUEVA) */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="font-serif text-3xl md:text-4xl text-leroy-black mb-4">
+                            Excelencia Comprobada
+                        </h2>
+                        <div className="w-24 h-1 bg-leroy-gold mx-auto"></div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                        <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">+15</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Años de Experiencia</div>
+                            <p className="text-gray-500 text-sm font-light leading-relaxed">
+                                Trayectoria impecable en el mercado de lujo nacional e internacional, construyendo relaciones duraderas.
+                            </p>
+                        </div>
+                        <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">98%</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Tasa de Cierre</div>
+                            <p className="text-gray-500 text-sm font-light leading-relaxed">
+                                Nuestras tasaciones precisas y marketing estratégico aseguran ventas efectivas al precio correcto.
+                            </p>
+                        </div>
+                        <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">24/7</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Atención Personalizada</div>
+                            <p className="text-gray-500 text-sm font-light leading-relaxed">
+                                Un agente dedicado exclusivamente a usted, gestionando cada visita y negociación con total discreción.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             {/* SECCION LIFESTYLE (REFUERZO DE MARCA) */}
