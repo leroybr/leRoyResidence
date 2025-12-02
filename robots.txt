@@ -1,9 +1,12 @@
 User-agent: *
 Allow: /
-Sitemap: https://www.leroyresidence.cl/sitemap.xml
+Disallow: /*?page=admin
+Sitemap: https://www.leroyresidence.com/sitemap.xml
 
 User-agent: Googlebot
 Allow: /
+Disallow: /*?page=admin
 
 User-agent: Bingbot
 Allow: /
+Disallow: /*?page=admin
