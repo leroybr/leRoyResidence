@@ -25,6 +25,35 @@ const App: React.FC = () => {
   const [currentCategory, setCurrentCategory] = useState<string>('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
+  // SEO: Dynamic Title Updates
+  useEffect(() => {
+    let title = 'LeRoy Residence | Corretaje de Propiedades de Lujo';
+    
+    if (currentView === 'home') {
+      title = 'LeRoy Residence | Inicio - Compra y Venta de Propiedades';
+    } else if (currentView === 'detail' && selectedProperty) {
+      title = `${selectedProperty.title} | LeRoy Residence`;
+    } else if (currentView === 'showroom') {
+      title = 'Nuevas Tecnologías en Cocina | Showroom LeRoy';
+    } else if (currentView === 'listing') {
+      if (currentCategory === 'premium') {
+        title = 'Propiedades Premium | LeRoy Residence';
+      } else if (currentCategory === 'real_estate') {
+        title = 'Bienes Raíces | LeRoy Residence';
+      } else if (currentCategory === 'developments') {
+        title = 'Nuevos Desarrollos | LeRoy Residence';
+      } else if (currentCategory) {
+        title = `Propiedades en ${currentCategory} | LeRoy Residence`;
+      } else {
+        title = 'Resultados de Búsqueda | LeRoy Residence';
+      }
+    } else if (currentView === 'admin') {
+      title = 'Administración | LeRoy Residence';
+    }
+
+    document.title = title;
+  }, [currentView, currentCategory, selectedProperty]);
+
   // Initialize view from URL query parameters for SEO and sharing
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

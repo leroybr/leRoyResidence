@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /*?page=admin
-Sitemap: https://www.leroyresidence.com/sitemap.xml
+Sitemap: https://www.leroyresidence.cl/sitemap.xml
 
 User-agent: Googlebot
 Allow: /

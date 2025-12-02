@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Página de Inicio (Prioridad Máxima) -->
   <url>
-    <loc>https://www.leroyresidence.com/</loc>
+    <loc>https://www.leroyresidence.cl/</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -10,28 +10,28 @@
   
   <!-- Secciones Comerciales Principales -->
   <url>
-    <loc>https://www.leroyresidence.com/?page=real_estate</loc>
+    <loc>https://www.leroyresidence.cl/?page=real_estate</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://www.leroyresidence.com/?page=premium</loc>
+    <loc>https://www.leroyresidence.cl/?page=premium</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://www.leroyresidence.com/?page=showroom_kitchens</loc>
+    <loc>https://www.leroyresidence.cl/?page=showroom_kitchens</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://www.leroyresidence.com/?page=developments</loc>
+    <loc>https://www.leroyresidence.cl/?page=developments</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -39,31 +39,31 @@
   
   <!-- SEO Local: Comunas Específicas -->
   <url>
-    <loc>https://www.leroyresidence.com/?page=Concepción</loc>
+    <loc>https://www.leroyresidence.cl/?page=Concepción</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.leroyresidence.com/?page=San%20Pedro%20de%20la%20Paz</loc>
+    <loc>https://www.leroyresidence.cl/?page=San%20Pedro%20de%20la%20Paz</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.leroyresidence.com/?page=Chiguayante</loc>
+    <loc>https://www.leroyresidence.cl/?page=Chiguayante</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.leroyresidence.com/?page=Talcahuano</loc>
+    <loc>https://www.leroyresidence.cl/?page=Talcahuano</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.leroyresidence.com/?page=Los%20Ángeles</loc>
+    <loc>https://www.leroyresidence.cl/?page=Los%20Ángeles</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
