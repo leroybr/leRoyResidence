@@ -37,9 +37,9 @@
     <priority>0.8</priority>
   </url>
   
-  <!-- SEO Local: Comunas Específicas -->
+  <!-- SEO Local: Comunas Específicas (Codificación correcta de tildes y espacios) -->
   <url>
-    <loc>https://www.leroyresidence.cl/?page=Concepción</loc>
+    <loc>https://www.leroyresidence.cl/?page=Concepci%C3%B3n</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -63,9 +63,21 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.leroyresidence.cl/?page=Los%20Ángeles</loc>
+    <loc>https://www.leroyresidence.cl/?page=Los%20%C3%81ngeles</loc>
     <lastmod>2024-05-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.leroyresidence.cl/?page=Coronel</loc>
+    <lastmod>2024-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.leroyresidence.cl/?page=Penco</loc>
+    <lastmod>2024-05-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>
