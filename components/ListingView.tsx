@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Property } from '../types';
 import PropertyCard from './PropertyCard';
@@ -6,16 +5,12 @@ import PropertyCard from './PropertyCard';
 interface ListingViewProps {
   category: string;
   properties: Property[];
-  onClearFilters: () => void;
-  onPropertyClick: (id: string) => void;
+  onPropertyClick: (property: Property) => void;
   onGoHome: () => void;
+  onClearFilters: () => void;
 }
 
-const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClearFilters, onPropertyClick, onGoHome }) => {
-  // Determine display title logic
-  // If the category is one of the known IDs or Cities, we format it.
-  // If it's a search result string (e.g. "Concepción, 3+ Dorm"), we use it directly.
-  
+const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPropertyClick, onGoHome, onClearFilters }) => {
   const knownCities = ['Concepción', 'Chiguayante', 'San Pedro de la Paz', 'Talcahuano', 'Coronel', 'Penco', 'Los Ángeles'];
   const isCity = knownCities.includes(category);
   
@@ -24,19 +19,18 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClear
 
   if (isCity) {
     title = `Inmuebles de lujo en ${category}`;
-  } else if (category === 'real_estate') {
+  } else if (category === 'Bienes Raíces') {
     title = 'Bienes Raíces de Lujo';
-  } else if (category === 'showroom_kitchens') {
+  } else if (category === 'Show room Cocinas') {
     title = 'Nuevas tecnologías en la Cocina ¡¡';
     subtitle = 'Innovación, diseño de vanguardia y funcionalidad para el corazón del hogar.';
-  } else if (category === 'developments') {
+  } else if (category === 'Desarrollos') {
     title = 'Nuevos Desarrollos';
-  } else if (category === 'premium') {
+  } else if (category === 'Premium Property') {
     title = 'Propiedades Premium';
   } else if (category.includes('Dorm') || category.includes('Precio')) {
-     // It's a complex search title, keep it as is
      title = `Resultados: ${category}`;
-  } else if (!category || category === 'Búsqueda Filtrada') {
+  } else if (!category || category === 'Resultados de Búsqueda') {
      title = 'Resultados de Búsqueda';
   }
 
@@ -44,7 +38,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClear
     <div className="pt-40 pb-20 min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Top Return Button */}
         <div className="mb-8">
           <button 
             onClick={onGoHome}
@@ -57,14 +50,12 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClear
           </button>
         </div>
 
-        {/* Breadcrumbs */}
         <nav className="flex text-xs text-gray-400 mb-6 uppercase tracking-wider">
           <span className="hover:text-leroy-black cursor-pointer" onClick={onGoHome}>Home</span>
           <span className="mx-2">/</span>
-          <span className="text-leroy-black font-semibold truncate max-w-xs">{category === 'premium' ? 'Premium' : category}</span>
+          <span className="text-leroy-black font-semibold truncate max-w-xs">{category}</span>
         </nav>
 
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-200 pb-8 mb-10">
           <div>
             <h1 className="font-serif text-4xl md:text-5xl text-leroy-black mb-4 capitalize">
@@ -95,12 +86,11 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClear
           </div>
         </div>
 
-        {/* Property Grid */}
         {properties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {properties.map(property => (
               <div key={property.id} className="h-full">
-                <PropertyCard property={property} onClick={onPropertyClick} />
+                <PropertyCard property={property} onClick={() => onPropertyClick(property)} />
               </div>
             ))}
           </div>
@@ -122,12 +112,11 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onClear
           </div>
         )}
         
-        {/* SEO / Description Text at bottom (Typical of JamesEdition) */}
         {properties.length > 0 && (
           <div className="mt-20 pt-10 border-t border-gray-100">
              <h2 className="font-serif text-2xl text-leroy-black mb-4">Sobre esta colección</h2>
              <p className="text-gray-500 text-sm leading-relaxed max-w-4xl columns-1 md:columns-2 gap-12">
-               Descubra las mejores propiedades en {category === 'premium' ? 'nuestra colección Premium' : category}. 
+               Descubra las mejores propiedades en {category === 'Premium Property' ? 'nuestra colección Premium' : category}. 
                Nuestra colección incluye desde modernas villas hasta penthouses históricos, todos seleccionados rigurosamente 
                para satisfacer los estándares más altos. LeRoy Residence es su socio confiable en el mercado inmobiliario de lujo.
              </p>
