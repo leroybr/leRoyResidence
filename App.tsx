@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -18,6 +19,22 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
+
+  // Restore simple query param reading on mount (for external links/sitemap compatibility)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    const category = params.get('category');
+    
+    if (page === 'listing' && category) {
+      setCurrentView('listing');
+      setSelectedCategory(category);
+    } else if (page === 'showroom') {
+      setCurrentView('showroom');
+    } else if (page === 'admin') {
+      setCurrentView('admin');
+    }
+  }, []);
 
   // Dynamic Title Management
   useEffect(() => {
