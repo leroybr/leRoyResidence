@@ -3,16 +3,14 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Carga todas las variables de entorno (incluyendo las de .env)
-  // El tercer argumento '' permite cargar variables que no tengan prefijo VITE_
-  // Fix: Cast process to any to avoid "Property 'cwd' does not exist on type 'Process'" error
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, (process as any).cwd(), '');
 
   return {
     plugins: [react()],
     define: {
-      // Inyecta la variable API_KEY del sistema/archivo .env en el código del cliente
-      // Se usa JSON.stringify para asegurar que sea un string válido
+      // Expose API_KEY to the client
       'process.env.API_KEY': JSON.stringify(env.API_KEY || '')
     }
   }
