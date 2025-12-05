@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Property } from '../types';
 
@@ -44,6 +45,7 @@ const ADDITIONAL_IMAGES = [
 
 const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoHome }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [contactPhone, setContactPhone] = useState('');
   
   const galleryImages = [property.imageUrl, ...ADDITIONAL_IMAGES];
   const { uf, clp } = getPriceDisplay(property.price, property.currency);
@@ -51,6 +53,22 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
   const amenities = property.amenities && property.amenities.length > 0 
     ? property.amenities 
     : ['Seguridad', 'Estacionamiento', 'Jardines'];
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Remove all non-digit characters
+    const rawValue = e.target.value.replace(/\D/g, '');
+    
+    // Limit to 8 digits (Chilean mobile number length after +56 9)
+    const truncated = rawValue.slice(0, 8);
+    
+    // Format as XXXX XXXX
+    let formatted = truncated;
+    if (truncated.length > 4) {
+      formatted = `${truncated.slice(0, 4)} ${truncated.slice(4)}`;
+    }
+    
+    setContactPhone(formatted);
+  };
 
   return (
     <div className="pt-40 pb-20 bg-white min-h-screen font-sans relative">
@@ -108,7 +126,7 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .contact-container {
-          width: 60%;
+          width: 50%;
           border: 2px solid rgb(0, 108, 117);
           border-radius: 0px;
           margin-top: 4rem;
@@ -118,6 +136,8 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
         @media (max-width: 768px) {
            .contact-container {
              width: 100%;
+             margin-top: 2rem;
+             border-width: 1px;
            }
         }
         .contact-header {
@@ -130,6 +150,11 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
           padding: 1.5rem;
           background-color: white;
         }
+        @media (max-width: 768px) {
+          .contact-body {
+            padding: 1.25rem;
+          }
+        }
         .teal-input {
           width: 100%;
           background-color: white;
@@ -140,6 +165,18 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
           margin-bottom: 12px;
           outline: none;
           border-radius: 0;
+          transition: border-color 0.2s;
+        }
+        @media (max-width: 768px) {
+          .teal-input {
+            font-size: 16px; /* Prevents iOS zoom */
+            padding: 12px 14px;
+            margin-bottom: 16px;
+          }
+        }
+        .teal-input:focus {
+          border-color: #004d55;
+          background-color: #fcfcfc;
         }
         .teal-input::placeholder {
           color: #999;
@@ -148,6 +185,11 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
            display: flex;
            margin-bottom: 12px;
            width: 100%;
+        }
+        @media (max-width: 768px) {
+          .phone-row {
+            margin-bottom: 16px;
+          }
         }
         .phone-prefix {
            background-color: rgb(0, 108, 117);
@@ -160,6 +202,12 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
            white-space: nowrap;
            font-weight: bold;
         }
+        @media (max-width: 768px) {
+          .phone-prefix {
+            font-size: 16px;
+            padding: 12px 14px;
+          }
+        }
         .teal-btn {
           width: 100%;
           background-color: rgb(0, 108, 117);
@@ -170,9 +218,17 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
           letter-spacing: 0.1em;
           padding: 1rem;
           margin-top: 0.5rem;
+          cursor: pointer;
+          transition: background-color 0.3s;
         }
         .teal-btn:hover {
-           opacity: 0.9;
+           background-color: #005a61;
+        }
+        @media (max-width: 768px) {
+          .teal-btn {
+            padding: 1.2rem;
+            font-size: 0.9rem;
+          }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -224,6 +280,7 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
                src={imgUrl} 
                alt={`Vista de propiedad ${property.title} ${index + 1}`}
                onClick={() => setSelectedImage(imgUrl)}
+               loading="lazy"
              />
            ))}
         </div>
@@ -287,7 +344,15 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
                     <input type="email" placeholder="Tu Email" className="teal-input" />
                     <div className="phone-row">
                         <div className="phone-prefix">+56 9</div>
-                        <input type="tel" placeholder="1234 5678" className="teal-input" style={{ marginBottom: 0, borderLeft: 'none' }} />
+                        <input 
+                          type="tel" 
+                          value={contactPhone}
+                          onChange={handlePhoneChange}
+                          placeholder="1234 5678" 
+                          className="teal-input" 
+                          style={{ marginBottom: 0, borderLeft: 'none' }} 
+                          maxLength={9} // 8 digits + 1 space
+                        />
                     </div>
                     <textarea rows={4} placeholder="Me interesa esta propiedad..." className="teal-input resize-none"></textarea>
                     <button className="teal-btn">Enviar Mensaje</button>
@@ -299,7 +364,12 @@ const PropertyDetailView: React.FC<PropertyDetailViewProps> = ({ property, onGoH
 
       {selectedImage && (
         <div className="modal" onClick={() => setSelectedImage(null)}>
-          <img src={selectedImage} alt="Fullscreen View" onClick={(e) => e.stopPropagation()} />
+          <img 
+             src={selectedImage} 
+             alt="Fullscreen View" 
+             onClick={(e) => e.stopPropagation()} 
+             loading="lazy" 
+          />
           <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 text-white hover:text-gray-300">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
           </button>
