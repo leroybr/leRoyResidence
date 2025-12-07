@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Property, PropertyType } from '../types';
 import { COMMUNES } from '../constants';

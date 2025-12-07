@@ -1,4 +1,3 @@
-
 import { Property, PropertyType } from './types';
 
 export const COMMUNES = [

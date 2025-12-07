@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HeroSearchState } from '../types';
 import { COMMUNES } from '../constants';
