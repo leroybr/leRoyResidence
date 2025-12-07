@@ -1,48 +1,29 @@
-import React, { useState, useEffect } from 'react';
-// ... (Importaciones de componentes y tipos)
+import path from 'path';
+import { defineConfig, loadEnv } from 'vite';
+import react from '@vitejs/plugin-react';
 
-const UF_VALUE_CLP = 37800; // Constante correcta
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  // Carga las variables de entorno. 
+  const env = loadEnv(mode, path.resolve('.'), '');
 
-const App: React.FC = () => {
-  // ... (Estados iniciales)
-
-  const handleHeroSearch = (filters: HeroSearchState) => {
-    setSearchFilters(filters);
+  return {
+    server: {
+      port: 3000,
+      host: '0.0.0.0',
+    },
+    plugins: [react()],
     
-    // Simplificamos la lógica y eliminamos la sintaxis errónea de JSON
-    if (filters.location && filters.bedrooms === 'any' && filters.priceRange === 'any') {
-        // Navegación basada en ubicación simple
-        handleNavigate('listing', filters.location);
-    } else {
-        // Navegación para búsquedas complejas
-        handleNavigate('listing', 'Resultados de Búsqueda');
-    }
-  };
+    // Inyecta las claves API en el código
+    define: {
+      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || '')
+    },
 
-  // Filter Logic
-  const getFilteredProperties = () => {
-    let filtered = properties;
-
-    // 1. Filter by Category / Location (CORRECCIÓN DE SINTAXIS/LÓGICA)
-    // Usamos AND (&&) para unir las condiciones.
-    if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') { 
-      if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
-        // Muestra todo por ahora
-      } else if (selectedCategory === 'Premium Property') { // Asumiendo que es "Premium Property"
-          filtered = filtered.filter(p => p.isPremium);
-      } else {
-        // Asume que category es una ubicación
-        filtered = filtered.filter(p => p.location.includes(selectedCategory));
+    resolve: {
+      alias: {
+        '@': path.resolve('.'),
       }
     }
-    
-    // ... (El resto de tu lógica de filtrado es funcionalmente correcta)
-    // ... (Conversión de divisas con advertencia de riesgo)
-
-    return filtered;
   };
-
-  // ... (renderContent y el final del componente)
-};
-
-export default App;
+});
