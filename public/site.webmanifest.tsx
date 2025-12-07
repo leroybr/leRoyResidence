@@ -1,4 +1,6 @@
-{
+// This file is a web manifest but has a .tsx extension.
+// Exporting the object to make it valid TypeScript syntax.
+const manifest = {
   "name": "LeRoy Residence",
   "short_name": "LeRoy",
   "description": "Corretaje de propiedades de lujo en Chile.",
@@ -19,4 +21,6 @@
       "type": "image/png"
     }
   ]
-}
+};
+
+export default manifest;
