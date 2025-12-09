@@ -29,8 +29,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate }) => {
 
   const isHome = currentView === 'home';
   
+  // CHANGE: Lightened the gradient from black/80 to black/50 to reduce "gray tone"
   const headerBaseClass = isHome && !scrolled && !isMobileMenuOpen
-    ? 'bg-gradient-to-b from-black/80 via-black/40 to-transparent text-white'
+    ? 'bg-gradient-to-b from-black/50 to-transparent text-white'
     : 'bg-white text-leroy-black shadow-sm border-b border-gray-100';
 
   const buttonBorderClass = isHome && !scrolled && !isMobileMenuOpen ? 'border-white hover:bg-white/10' : 'border-leroy-black hover:bg-black/5';
