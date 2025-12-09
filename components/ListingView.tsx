@@ -81,9 +81,9 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
   let subtitle = `Explora nuestra selección exclusiva. ${filteredProperties.length} propiedades encontradas.`;
 
   if (isCity) {
-    title = `Inmuebles de lujo en ${category}`;
+    title = `Inmuebles en ${category}`;
   } else if (category === 'Bienes Raíces') {
-    title = 'Bienes Raíces de Lujo';
+    title = 'Bienes Raíces';
   } else if (category === 'Show room Cocinas') {
     title = 'Nuevas tecnologías en la Cocina ¡¡';
     subtitle = 'Innovación, diseño de vanguardia y funcionalidad para el corazón del hogar.';
@@ -243,7 +243,7 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
              <p className="text-gray-500 text-sm leading-relaxed max-w-4xl columns-1 md:columns-2 gap-12">
                Descubra las mejores propiedades en {category === 'Premium Property' ? 'nuestra colección Premium' : category}. 
                Nuestra colección incluye desde modernas villas hasta penthouses históricos, todos seleccionados rigurosamente 
-               para satisfacer los estándares más altos. LeRoy Residence es su socio confiable en el mercado inmobiliario de lujo.
+               para satisfacer los estándares más altos. LeRoy Residence es su socio confiable en el mercado inmobiliario.
              </p>
           </div>
         )}
