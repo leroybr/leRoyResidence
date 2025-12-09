@@ -227,6 +227,7 @@ const App: React.FC = () => {
             onPropertyClick={handlePropertyClick}
             onGoHome={() => handleNavigate('home')}
             onClearFilters={() => handleNavigate('listing', 'Bienes Raíces')}
+            onNavigate={handleNavigate}
           />
         );
 
