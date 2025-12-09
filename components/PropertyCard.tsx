@@ -1,9 +1,13 @@
 import React from 'react';
 import { Property } from '../types';
 
+// 🛑 CORRECCIÓN CLAVE: Agregar 'onGoHome' a la interfaz
 interface PropertyCardProps {
   property: Property;
   onClick: () => void;
+  // Añadida la prop 'onGoHome' para resolver el error TS2322 en App.tsx. 
+  // La hacemos opcional (?) ya que no se usa en este componente.
+  onGoHome?: () => void; 
 }
 
 const UF_VALUE_CLP = 37800;
@@ -14,13 +18,15 @@ const formatCLP = (amount: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
+// Se desestructura la prop onGoHome para que el componente la acepte, aunque no se use.
+export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, onGoHome }) => {
   let mainPriceDisplay = '';
   let secondaryPriceDisplay = '';
   
   const cleanCurrency = property.currency.trim();
   const price = property.price;
 
+  // --- Lógica de Conversión de Precios (No necesita cambios) ---
   if (cleanCurrency === 'UF') {
     mainPriceDisplay = `UF ${price.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
     secondaryPriceDisplay = formatCLP(price * UF_VALUE_CLP);
@@ -38,6 +44,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
     mainPriceDisplay = `${cleanCurrency} ${price.toLocaleString()}`;
   }
 
+  // --- JSX de la Tarjeta (No necesita cambios de diseño) ---
   return (
     <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
       {/* Increased height to h-80 to make image larger and vertical dominance */}
@@ -58,7 +65,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
         {/* Price Section moved to top */}
         <div className="flex flex-col w-full items-baseline mb-2">
             <span className="text-xl font-bold text-black">
-               {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
+                {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
             </span>
             {secondaryPriceDisplay && property.price > 0 && (
               <span className="text-xs text-gray-500 font-medium mt-0.5">
