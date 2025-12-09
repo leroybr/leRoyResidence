@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   // Dynamic Title Management
   useEffect(() => {
-    let title = 'LeRoy Residence | Corretaje de Propiedades de Lujo';
+    let title = 'LeRoy Residence | Corretaje de Propiedades';
 
     if (currentView === 'home') title = 'LeRoy Residence | Inicio - Compra y Venta';
     else if (currentView === 'showroom') title = 'Nuevas Tecnologías en Cocina | LeRoy';
