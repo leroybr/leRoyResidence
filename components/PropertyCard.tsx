@@ -40,41 +40,41 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
 
   return (
     <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
-      <div className="relative overflow-hidden aspect-[4/3] bg-gray-200">
+      <div className="relative overflow-hidden aspect-[4/3] bg-gray-100">
         <img 
           src={property.imageUrl} 
           alt={`${property.type} en ${property.location} - ${property.title}`}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] font-bold tracking-widest uppercase text-leroy-black">
+        <div className="absolute top-3 left-3 bg-white/95 px-2 py-1 text-[9px] font-bold tracking-widest uppercase text-black border border-black/5 shadow-sm">
           {property.type}
         </div>
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
 
-      <div className="pt-6 pb-2 flex-grow flex flex-col">
-        <h3 className="font-serif text-xl text-leroy-black line-clamp-2 mb-2 group-hover:underline decoration-1 underline-offset-4">
+      <div className="pt-4 pb-2 flex-grow flex flex-col">
+        <h3 className="font-serif text-lg text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-snug">
           {property.title}
         </h3>
-        <p className="text-gray-500 text-sm font-medium uppercase tracking-wide mb-4">
+        <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-3">
           {property.location}
         </p>
 
-        <div className="mt-auto pt-4 border-t border-gray-100 flex flex-col items-start">
+        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col items-start">
           <div className="flex flex-col w-full items-baseline">
-            <span className="text-lg font-semibold text-leroy-black">
+            <span className="text-base font-bold text-black">
                {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
             </span>
             {secondaryPriceDisplay && property.price > 0 && (
-              <span className="text-sm text-gray-400 font-medium">
+              <span className="text-xs text-gray-500 font-medium mt-0.5">
                 {secondaryPriceDisplay}
               </span>
             )}
           </div>
-          <div className="flex items-center space-x-4 text-gray-400 text-xs mt-3">
+          <div className="flex items-center space-x-3 text-gray-400 text-[10px] uppercase font-bold tracking-wider mt-2">
              <span title="Habitaciones">{property.bedrooms} hab.</span>
-             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+             <span className="w-0.5 h-3 bg-gray-300"></span>
              <span title="Área">{property.area} m²</span>
           </div>
         </div>
