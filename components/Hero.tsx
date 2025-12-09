@@ -50,7 +50,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
   };
 
   return (
-    <div className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-gray-900">
+    <div className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-black">
       {/* Background Image Carousel */}
       <div className="absolute inset-0 z-0">
         {HERO_IMAGES.map((img, index) => {
@@ -75,8 +75,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
                 alt={`Luxury Property Background ${index + 1}`} 
                 className="w-full h-full object-cover" 
               />
-              {/* CHANGE: Replaced bg-black/30 with a subtle gradient only at the bottom to clarify the image */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-black/30"></div>
             </div>
           );
         })}
@@ -84,8 +83,8 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
 
       {/* Content */}
       <div className="relative z-20 w-full max-w-6xl px-4 text-center">
-        {/* Updated Title: Slightly smaller font size */}
-        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white mb-8 md:mb-10 leading-tight drop-shadow-2xl px-2 max-w-5xl mx-auto">
+        {/* Changed lg:text-5xl to max text-4xl as requested */}
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl text-white mb-8 md:mb-10 leading-tight px-2 max-w-5xl mx-auto drop-shadow-lg">
           Vende o compra tu propiedad con acompañamiento profesional y seguro.
         </h1>
         
