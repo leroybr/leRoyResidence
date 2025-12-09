@@ -14,7 +14,7 @@ const formatCLP = (amount: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 
-const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
   let mainPriceDisplay = '';
   let secondaryPriceDisplay = '';
   
@@ -87,4 +87,3 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
     </div>
   );
 };
-
