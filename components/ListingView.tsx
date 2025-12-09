@@ -122,7 +122,7 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
             </h1>
         </div>
 
-        {/* Buttons Bar */}
+        {/* Buttons Bar - Only Filters button now */}
         <div className="flex flex-wrap items-center gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
            {/* Filters Toggle Button */}
            <button 
@@ -133,20 +133,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
               </svg>
               Filtros
-           </button>
-
-           {/* Navigation Buttons */}
-           <button onClick={() => onNavigate('listing', 'Bienes Raíces')} className="border border-gray-300 text-black px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors shrink-0 whitespace-nowrap">
-              Bienes Raíces
-           </button>
-           <button onClick={() => onNavigate('showroom')} className="border border-gray-300 text-black px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors shrink-0 whitespace-nowrap">
-              Showroom
-           </button>
-           <button onClick={() => onNavigate('listing', 'Desarrollos')} className="border border-gray-300 text-black px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors shrink-0 whitespace-nowrap">
-              Desarrollos
-           </button>
-           <button onClick={() => onNavigate('listing', 'Premium Property')} className="border border-gray-300 text-black px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors shrink-0 whitespace-nowrap">
-              Premium
            </button>
         </div>
 
