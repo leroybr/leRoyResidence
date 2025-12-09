@@ -50,7 +50,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
   };
 
   return (
-    <div className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-black">
+    <div className="relative h-[80vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden bg-gray-900">
       {/* Background Image Carousel */}
       <div className="absolute inset-0 z-0">
         {HERO_IMAGES.map((img, index) => {
@@ -75,7 +75,8 @@ const Hero: React.FC<HeroProps> = ({ onSearch, isSearching }) => {
                 alt={`Luxury Property Background ${index + 1}`} 
                 className="w-full h-full object-cover" 
               />
-              <div className="absolute inset-0 bg-black/30"></div>
+              {/* CHANGE: Replaced bg-black/30 with a subtle gradient only at the bottom to clarify the image */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             </div>
           );
         })}
