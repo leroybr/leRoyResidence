@@ -41,7 +41,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
   return (
     <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
       {/* Increased height to h-80 to make image larger and vertical dominance */}
-      <div className="relative overflow-hidden w-full h-80 bg-gray-100">
+      <div className="relative overflow-hidden w-full h-80 bg-gray-100 mb-3">
         <img 
           src={property.imageUrl} 
           alt={`${property.type} en ${property.location} - ${property.title}`}
@@ -54,17 +54,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
 
-      <div className="pt-5 pb-2 flex-grow flex flex-col text-left">
-        <h3 className="font-serif text-xl text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-tight">
-          {property.title}
-        </h3>
-        <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-3">
-          {property.location}
-        </p>
-
-        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col items-start">
-          <div className="flex flex-col w-full items-baseline">
-            <span className="text-lg font-bold text-black">
+      <div className="flex flex-col text-left">
+        {/* Price Section moved to top */}
+        <div className="flex flex-col w-full items-baseline mb-2">
+            <span className="text-xl font-bold text-black">
                {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
             </span>
             {secondaryPriceDisplay && property.price > 0 && (
@@ -72,12 +65,23 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
                 {secondaryPriceDisplay}
               </span>
             )}
-          </div>
-          <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider mt-3">
+        </div>
+
+        {/* Title */}
+        <h3 className="font-serif text-lg text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-tight">
+          {property.title}
+        </h3>
+
+        {/* Location */}
+        <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2">
+          {property.location}
+        </p>
+
+        {/* Specs */}
+        <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider pt-2 border-t border-gray-50 mt-1">
              <span title="Habitaciones">{property.bedrooms} hab.</span>
              <span className="w-px h-3 bg-gray-300"></span>
              <span title="Área">{property.area} m²</span>
-          </div>
         </div>
       </div>
     </div>
