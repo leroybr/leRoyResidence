@@ -3,7 +3,8 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 import { PropertyCard } from './components/PropertyCard';
-import ListingView from './components/ListingView';
+// 🛑 CORRECCIÓN TS2613: Se corrige la importación de ListingView
+import { ListingView } from './components/ListingView'; 
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
 import ShowroomView from './components/ShowroomView';
@@ -73,8 +74,8 @@ const App: React.FC = () => {
        // Direct location navigation
        handleNavigate('listing', filters.location);
     } else {
-       // Complex search
-       handleNavigate('listing', 'Resultados de Búsqueda');
+      // Complex search
+      handleNavigate('listing', 'Resultados de Búsqueda');
     }
   };
 
@@ -93,7 +94,7 @@ const App: React.FC = () => {
       if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
         // Show all for now, or add specific logic
       } else if (selectedCategory === 'Premium Property') {
-         filtered = filtered.filter(p => p.isPremium);
+          filtered = filtered.filter(p => p.isPremium);
       } else {
         // Assume category is a location name
         filtered = filtered.filter(p => p.location.includes(selectedCategory));
@@ -115,15 +116,15 @@ const App: React.FC = () => {
         let max = maxStr === 'plus' ? Number.MAX_SAFE_INTEGER : parseInt(maxStr);
 
         filtered = filtered.filter(p => {
-             let priceInCLP = 0;
-             const currency = p.currency.trim();
-             // Normalize to CLP for filtering
-             if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
-             else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950; 
-             else if (currency === '€') priceInCLP = p.price * 1020; 
-             else priceInCLP = p.price; 
-             
-             return priceInCLP >= min && priceInCLP <= max;
+            let priceInCLP = 0;
+            const currency = p.currency.trim();
+            // Normalize to CLP for filtering
+            if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
+            else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950; 
+            else if (currency === '€') priceInCLP = p.price * 1020; 
+            else priceInCLP = p.price; 
+            
+            return priceInCLP >= min && priceInCLP <= max;
         });
       }
     }
@@ -147,7 +148,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-2 mt-4 md:mt-0">
                      <button onClick={() => handleNavigate('listing', 'Bienes Raíces')} className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70 transition-opacity">
-                       Ver cartera completa &rarr;
+                        Ver cartera completa &rarr;
                      </button>
                   </div>
                 </div>
@@ -157,6 +158,8 @@ const App: React.FC = () => {
                       <PropertyCard 
                         property={property} 
                         onClick={() => handlePropertyClick(property)} 
+                        // 🛑 CORRECCIÓN TS2322: Se remueve la prop onGoHome aquí ya que no es necesaria
+                        // y causaba el error TS2322 porque PropertyCard.tsx no la acepta.
                       />
                     </div>
                   ))}
@@ -184,18 +187,18 @@ const App: React.FC = () => {
                       <div className="w-24 h-1 bg-leroy-gold mx-auto"></div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                      <div className="px-4 py-4">
-                          <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">+15</div>
-                          <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Años de Experiencia</div>
-                      </div>
-                      <div className="px-4 py-4">
-                          <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">98%</div>
-                          <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Tasa de Cierre</div>
-                      </div>
-                      <div className="px-4 py-4">
-                          <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">24/7</div>
-                          <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Atención Personalizada</div>
-                      </div>
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">+15</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Años de Experiencia</div>
+                       </div>
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">98%</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Tasa de Cierre</div>
+                       </div>
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">24/7</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Atención Personalizada</div>
+                       </div>
                   </div>
               </div>
             </section>
@@ -244,21 +247,3 @@ const App: React.FC = () => {
       
       case 'admin':
         return <AdminView onAddProperty={handleAddProperty} onCancel={() => handleNavigate('home')} />;
-
-      default:
-        return <div>Página no encontrada</div>;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
-      <Header currentView={currentView} onNavigate={handleNavigate} />
-      <main className="flex-grow">
-        {renderContent()}
-      </main>
-      <Footer />
-    </div>
-  );
-};
-
-export default App;
