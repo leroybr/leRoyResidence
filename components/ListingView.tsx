@@ -8,14 +8,13 @@ interface ListingViewProps {
   onPropertyClick: (property: Property) => void;
   onGoHome: () => void;
   onClearFilters: () => void;
-  onNavigate: (view: string, category?: string) => void;
 }
 
 const UF_VALUE_CLP = 37800;
 const USD_VALUE_CLP = 950;
 const EUR_VALUE_CLP = 1020;
 
-const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPropertyClick, onGoHome, onClearFilters, onNavigate }) => {
+const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPropertyClick, onGoHome, onClearFilters }) => {
   const knownCities = ['Concepción', 'Chiguayante', 'San Pedro de la Paz', 'Talcahuano', 'Coronel', 'Penco', 'Los Ángeles'];
   const isCity = knownCities.includes(category);
   
