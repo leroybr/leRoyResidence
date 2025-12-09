@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
-import PropertyCard from './components/PropertyCard';
+import { PropertyCard } from './components/PropertyCard';
 import ListingView from './components/ListingView';
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
