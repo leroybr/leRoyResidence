@@ -40,21 +40,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
 
   return (
     <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
-      <div className="relative overflow-hidden aspect-[4/3] bg-gray-100">
+      {/* Increased height to h-80 to make image larger and vertical dominance */}
+      <div className="relative overflow-hidden w-full h-80 bg-gray-100">
         <img 
           src={property.imageUrl} 
           alt={`${property.type} en ${property.location} - ${property.title}`}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute top-3 left-3 bg-white/95 px-2 py-1 text-[9px] font-bold tracking-widest uppercase text-black border border-black/5 shadow-sm">
+        <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-black border border-black/5 shadow-sm">
           {property.type}
         </div>
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       </div>
 
-      <div className="pt-4 pb-2 flex-grow flex flex-col">
-        <h3 className="font-serif text-lg text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-snug">
+      <div className="pt-5 pb-2 flex-grow flex flex-col text-left">
+        <h3 className="font-serif text-xl text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-tight">
           {property.title}
         </h3>
         <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider mb-3">
@@ -63,7 +64,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
 
         <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col items-start">
           <div className="flex flex-col w-full items-baseline">
-            <span className="text-base font-bold text-black">
+            <span className="text-lg font-bold text-black">
                {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
             </span>
             {secondaryPriceDisplay && property.price > 0 && (
@@ -72,9 +73,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
               </span>
             )}
           </div>
-          <div className="flex items-center space-x-3 text-gray-400 text-[10px] uppercase font-bold tracking-wider mt-2">
+          <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider mt-3">
              <span title="Habitaciones">{property.bedrooms} hab.</span>
-             <span className="w-0.5 h-3 bg-gray-300"></span>
+             <span className="w-px h-3 bg-gray-300"></span>
              <span title="Área">{property.area} m²</span>
           </div>
         </div>
