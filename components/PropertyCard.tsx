@@ -88,4 +88,3 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
   );
 };
 
-export default PropertyCard;
