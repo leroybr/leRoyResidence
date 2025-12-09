@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Property, PropertyType } from '../types';
-import PropertyCard from './PropertyCard';
+import { PropertyCard } from './PropertyCard';
 
 interface ListingViewProps {
   category: string;
