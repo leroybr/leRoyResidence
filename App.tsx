@@ -227,7 +227,7 @@ const App: React.FC = () => {
             onPropertyClick={handlePropertyClick}
             onGoHome={() => handleNavigate('home')}
             onClearFilters={() => handleNavigate('listing', 'Bienes Raíces')}
-            onNavigate={handleNavigate}
+            // Removed onNavigate prop to avoid build errors in ListingView
           />
         );
 
