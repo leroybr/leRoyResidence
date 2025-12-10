@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface ShowroomViewProps {
-  onNavigate: (view: string, category?: string) => void; // <--- CORREGIDO: Ahora espera 'onNavigate'
+  onNavigate: (view: string, category?: string) => void; 
 }
 
 const KITCHEN_TRENDS = [
@@ -64,7 +64,7 @@ const FEATURES_LIST = [
   "Apagado automático"
 ];
 
-const ShowroomView: React.FC<ShowroomViewProps> = ({ onNavigate }) => { // <--- CORREGIDO: Usa 'onNavigate'
+const ShowroomView: React.FC<ShowroomViewProps> = ({ onNavigate }) => { 
   const [showInductionGallery, setShowInductionGallery] = useState(false);
 
   // Split trends for layout: First 3 are the "Main Theme", rest are grid
@@ -78,7 +78,7 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onNavigate }) => { // <--- 
         {/* Navigation Back */}
         <div className="mb-8">
           <button 
-            onClick={() => onNavigate('home')} // <--- CORREGIDO: Llama a onNavigate
+            onClick={() => onNavigate('home')} 
             className="flex items-center text-[10px] font-bold uppercase tracking-widest text-black hover:text-gray-600 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 mr-2">
