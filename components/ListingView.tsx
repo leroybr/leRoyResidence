@@ -1,68 +1,66 @@
 import React from 'react';
-import { Property } from '../types';
 import { PropertyCard } from './PropertyCard';
+import { Property, HeroSearchState } from '../types';
 
+// Definición de la interfaz Props, incluyendo la prop faltante 'searchFilters'
 interface ListingViewProps {
-  category: string;
   properties: Property[];
+  category: string;
+  searchFilters: HeroSearchState | null; // <--- CORREGIDO: Propiedad requerida por App.tsx
   onPropertyClick: (property: Property) => void;
-  onGoHome: () => void;
-  onClearFilters: () => void;
-  // 💡 CORRECCIÓN para TS2322: Se añade 'onNavigate'
-  onNavigate: (view: string, category?: string) => void;
 }
 
-const ListingView: React.FC<ListingViewProps> = ({
-  category,
-  properties,
-  onPropertyClick,
-  onGoHome,
-  onClearFilters,
-  onNavigate, // Se desestructura la nueva prop
+const ListingView: React.FC<ListingViewProps> = ({ 
+    properties, 
+    category, 
+    searchFilters, 
+    onPropertyClick 
 }) => {
+
+  const title = category === 'Resultados de Búsqueda' 
+    ? 'Resultados de tu Búsqueda'
+    : `Listado de Propiedades en ${category}`;
+
+  const subtitle = properties.length > 0
+    ? `${properties.length} ${properties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}.`
+    : `No se encontraron propiedades para la categoría o filtros seleccionados.`;
+
   return (
-    <div className="w-full pt-24">
-      <div className="max-w-7xl mx-auto px-6 lg:px-0 flex flex-col gap-6">
+    <div className="bg-gray-50 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Título de la Vista */}
+        <header className="mb-10 text-center">
+          <h1 className="text-4xl font-serif text-leroy-black mb-2">{title}</h1>
+          <p className="text-gray-600 text-lg">{subtitle}</p>
 
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold">{category}</h2>
+          {/* Mostrar filtros si existen */}
+          {searchFilters && category === 'Resultados de Búsqueda' && (
+            <div className="mt-4 p-3 bg-white border border-gray-200 rounded-lg inline-block text-sm text-gray-700 shadow-sm">
+                Filtros: 
+                <span className="font-semibold ml-2">Ubicación: </span>{searchFilters.location || 'Cualquiera'},
+                <span className="font-semibold ml-2">Dormitorios: </span>{searchFilters.bedrooms !== 'any' ? `${searchFilters.bedrooms}+` : 'Cualquiera'},
+                <span className="font-semibold ml-2">Precio: </span>{searchFilters.priceRange !== 'any' ? searchFilters.priceRange : 'Cualquiera'}
+            </div>
+          )}
+        </header>
 
-          <div className="flex gap-3">
-            <button
-              onClick={onClearFilters}
-              className="px-4 py-2 border rounded hover:bg-gray-100"
-            >
-              Limpiar filtros
-            </button>
-
-            <button
-              onClick={onGoHome}
-              className="px-4 py-2 border rounded hover:bg-gray-100"
-            >
-              Inicio
-            </button>
-          </div>
-        </div>
-
-        {properties.length === 0 ? (
-           <div className="py-20 text-center text-gray-500">
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto mb-4 text-gray-300">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-               </svg>
-               <h3 className="text-xl font-semibold mb-2 text-leroy-black">No se encontraron propiedades</h3>
-               <p>Intenta ajustar tus filtros de búsqueda o <button onClick={() => onNavigate('listing', 'Bienes Raíces')} className="text-blue-600 hover:underline">ver toda la cartera</button>.</p>
-           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((prop) => (
-              <PropertyCard
-                key={prop.id}
-                property={prop}
-                onClick={() => onPropertyClick(prop)}
+        {/* Lista de Propiedades */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {properties.length > 0 ? (
+            properties.map(property => (
+              <PropertyCard 
+                key={property.id} 
+                property={property} 
+                onClick={() => onPropertyClick(property)} 
               />
-            ))}
-          </div>
-        )}
+            ))
+          ) : (
+            <div className="col-span-full text-center py-20">
+              <p className="text-xl text-gray-500">Intenta ajustar los filtros de búsqueda.</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
