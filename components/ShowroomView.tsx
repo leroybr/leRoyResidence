@@ -67,13 +67,14 @@ const FEATURES_LIST = [
 
 const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
   const [showInductionGallery, setShowInductionGallery] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   return (
-    <div className="pt-24 md:pt-40 pb-20 min-h-screen bg-white font-sans">
+    <div className="pt-28 md:pt-36 pb-20 min-h-screen bg-white font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Navigation Back */}
-        <div className="mb-8 md:mb-12">
+        <div className="mb-2 md:mb-4">
           <button 
             onClick={onGoHome}
             className="flex items-center text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black transition-colors"
@@ -86,16 +87,16 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
         </div>
 
         {/* Header Section */}
-        <div className="mb-10 md:mb-16 border-b border-gray-100 pb-8 md:pb-10">
-          <span className="text-xs font-bold text-leroy-gold tracking-[0.2em] uppercase mb-4 block">
+        <div className="mb-4 md:mb-6 border-b border-gray-100 pb-2 md:pb-4">
+          <span className="text-xs font-bold text-leroy-gold tracking-[0.2em] uppercase mb-2 block">
             Showroom & Tendencias
           </span>
           
-          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-leroy-black mb-6 leading-tight">
+          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl text-leroy-black mb-2 leading-tight">
             Nuevas tecnologías en la cocina
           </h1>
           
-          <p className="font-prata text-lg md:text-2xl text-gray-600 max-w-4xl leading-relaxed text-left">
+          <p className="font-prata text-base md:text-xl text-gray-600 max-w-4xl leading-relaxed text-left">
             Tu cocina, más eficiente, cómoda, y linda con todos los avances que te contamos.
           </p>
         </div>
@@ -104,7 +105,8 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-y-16">
           {KITCHEN_TRENDS.map((item, index) => {
             const isFirstItem = index === 0;
-            const isSecondItem = item.id === 2;
+            // Treat both 2nd (index 1) and 3rd (index 2) items as "Feature Items" to maintain row height uniformity
+            const isFeatureItem = index === 1 || index === 2;
 
             // Special layout for the first item (Text Only + Modal Trigger)
             if (isFirstItem) {
@@ -133,11 +135,12 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                );
             }
 
-            // Special layout for Item 2: Features overlay on image
-            if (isSecondItem) {
+            // Special layout for Item 2 & 3: Overlay on image, full height
+            if (isFeatureItem) {
                 return (
                     <article 
                         key={item.id} 
+                        onClick={() => setLightboxImage(item.image)}
                         className="group cursor-pointer relative overflow-hidden h-[400px] md:h-full"
                     >
                         <img 
@@ -151,20 +154,30 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
                                 {item.category}
                             </span>
                             <h3 className="font-serif text-2xl md:text-3xl text-white mb-4">
-                                Inducción Invisible
+                                {item.title}
                             </h3>
                             
-                            {/* Feature List Overlay */}
-                            <ul className="space-y-2 mb-4">
-                                {FEATURES_LIST.map((feat, i) => (
-                                    <li key={i} className="flex items-start text-white/90 font-inter text-xs md:text-sm font-medium">
-                                        <svg className="w-4 h-4 text-leroy-gold mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                        {feat}
-                                    </li>
-                                ))}
-                            </ul>
+                            {/* Conditional Content: Features List (Item 2) vs Description (Item 3) */}
+                            {item.id === 2 ? (
+                                <ul className="space-y-2 mb-4">
+                                    {FEATURES_LIST.map((feat, i) => (
+                                        <li key={i} className="flex items-start text-white/90 font-inter text-xs md:text-sm font-medium">
+                                            <svg className="w-4 h-4 text-leroy-gold mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                            {feat}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-white/90 font-prata text-sm md:text-base leading-relaxed mb-4 line-clamp-4">
+                                    {item.description}
+                                </p>
+                            )}
+                            
+                            <div className="text-white text-[10px] font-bold uppercase tracking-widest mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Ver imagen completa
+                            </div>
                         </div>
                     </article>
                 );
@@ -174,14 +187,18 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
             return (
               <article 
                 key={item.id} 
+                onClick={() => setLightboxImage(item.image)}
                 className="group cursor-pointer relative flex flex-col"
               >
-                <div className="overflow-hidden mb-6 aspect-[4/3]">
+                <div className="overflow-hidden mb-6 aspect-[4/3] relative">
                   <img 
                     src={item.image} 
                     alt={item.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="text-white bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Ver</span>
+                  </div>
                 </div>
                 
                 <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
@@ -229,11 +246,13 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 px-0 md:px-4 pb-12 md:pb-0">
                {INDUCTION_GALLERY_IMAGES.map((img, idx) => (
                   <div key={idx} className="bg-white p-2 md:p-4 shadow-2xl border border-gray-100">
-                      <div className="h-[300px] md:h-[600px] w-full overflow-hidden">
+                      {/* Enforced fixed aspect ratio for uniformity "same box size" */}
+                      <div className="w-full aspect-[4/3] overflow-hidden bg-gray-50 relative">
                           <img 
                              src={img} 
                              alt={`Induction Frame ${idx + 1}`} 
-                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                             className="absolute inset-0 w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-500"
+                             onClick={() => setLightboxImage(img)}
                           />
                       </div>
                   </div>
@@ -241,6 +260,30 @@ const ShowroomView: React.FC<ShowroomViewProps> = ({ onGoHome }) => {
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox for Single Images */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-[110] bg-black/98 flex justify-center items-center p-4 cursor-zoom-out"
+          onClick={() => setLightboxImage(null)}
+        >
+           <button 
+              onClick={() => setLightboxImage(null)}
+              className="absolute top-6 right-6 text-white hover:text-gray-300 z-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+           <img 
+             src={lightboxImage} 
+             alt="Fullscreen" 
+             className="max-w-[95%] max-h-[95%] object-contain shadow-2xl rounded-sm animate-in fade-in duration-300 zoom-in-95"
+             onClick={(e) => e.stopPropagation()}
+           />
         </div>
       )}
     </div>
