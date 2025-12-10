@@ -1,194 +1,194 @@
-// ListingView.tsx
-
+// components/ListingView.tsx
 import React, { useState, useEffect } from 'react';
-import { Property, PropertyType, HeroSearchState } from '../types'; // Importar HeroSearchState
-import { PropertyCard } from './PropertyCard';
+import { Property, PropertyType } from '../types';
+import { PropertyCard } from './PropertyCard'; // Asegúrate de que esta importación sea correcta
 
+// Definiciones de tipos para las props
 interface ListingViewProps {
-  category: string;
-  properties: Property[];
-  onPropertyClick: (property: Property) => void;
-  onGoHome: () => void;
-  onClearFilters: () => void;
-  onNavigate: (view: string, category?: string) => void;
-  // Se espera esta prop de App.tsx para mostrar resultados de búsqueda iniciales
-  searchFilters: HeroSearchState | null; 
+    properties: Property[];
+    categoryTitle: string;
+    onSelectProperty: (property: Property) => void;
 }
 
-const UF_VALUE_CLP = 37800;
-const USD_VALUE_CLP = 950;
-const EUR_VALUE_CLP = 1020;
+// Valores de filtro para los selectores (deben coincidir con types.ts)
+const propertyTypeOptions = [
+    { value: 'any', label: 'Tipo de Propiedad' },
+    ...Object.values(PropertyType).map(type => ({ value: type, label: type }))
+];
 
-const ListingView: React.FC<ListingViewProps> = ({
-  category,
-  properties,
-  onPropertyClick,
-  onGoHome,
-  onClearFilters,
-  onNavigate,
-  searchFilters,
-}) => {
-  // --- Local Filter State ---
-  const [filterMinPrice, setFilterMinPrice] = useState<string>('');
-  const [filterMaxPrice, setFilterMaxPrice] = useState<string>('');
-  const [filterBedrooms, setFilterBedrooms] = useState<number>(0);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+const priceRangeOptions = [
+    { value: 'any', label: 'Cualquier Precio' },
+    { value: '0-50000000', label: 'Hasta $50M CLP' },
+    { value: '50000001-100000000', label: '$50M - $100M CLP' },
+    { value: '100000001-200000000', label: '$100M - $200M CLP' },
+    { value: '200000001-500000000', label: '$200M - $500M CLP' },
+    { value: '500000001-999999999999', label:'Más de $500M CLP' }
+];
 
-  // Reset local filters when category changes or a new search is initiated
-  useEffect(() => {
-    setFilterMinPrice('');
-    setFilterMaxPrice('');
-    setFilterBedrooms(0);
-    setFilterType('all');
-    setIsFiltersOpen(false);
-    
-    // BONUS: Si App.tsx ya aplicó filtros (searchFilters), re-ejecutamos el filtro local
-    // ya que el useEffect de filtrado depende de `searchFilters`.
-    // No es necesario establecer el estado aquí porque el useEffect de abajo se encarga.
-    
-  }, [category, searchFilters]); // Dependencia de searchFilters
+const bedroomsOptions = [
+    { value: 'any', label: 'Habitaciones' },
+    { value: '1+', label: '1+' },
+    { value: '2+', label: '2+' },
+    { value: '3+', label: '3+' },
+    { value: '4+', label: '4+' }
+];
 
-  // Apply filters logic
-  useEffect(() => {
-    let result = properties;
+// Asumiendo un valor de conversión UF fijo para el filtrado secundario
+const UF_VALUE_CLP = 37800; 
 
-    // 1. Filtro local por Tipo
-    if (filterType !== 'all') {
-      result = result.filter(p => p.type === filterType);
-    }
+const ListingView: React.FC<ListingViewProps> = ({ properties, categoryTitle, onSelectProperty }) => {
+    
+    // Estados de filtros secundarios
+    const [filterType, setFilterType] = useState('any');
+    const [filterPrice, setFilterPrice] = useState('any');
+    const [filterBedrooms, setFilterBedrooms] = useState('any');
+    const [filteredProperties, setFilteredProperties] = useState(properties);
+    
+    // Efecto para actualizar la lista filtrada cuando cambian las propiedades principales o los filtros
+    useEffect(() => {
+        let result = properties;
 
-    // 2. Filtro local por Dormitorios
-    if (filterBedrooms > 0) {
-      result = result.filter(p => p.bedrooms >= filterBedrooms);
-    }
+        // --- FILTRO POR TIPO ---
+        if (filterType !== 'any') {
+            result = result.filter(p => p.type === filterType);
+        }
 
-    // 3. Filtro local por Precio (si se aplica localmente, el filtro global de App.tsx ya actuó sobre `properties`)
-    if (filterMinPrice || filterMaxPrice) {
-      const min = filterMinPrice ? parseInt(filterMinPrice) : 0;
-      const max = filterMaxPrice ? parseInt(filterMaxPrice) : Number.MAX_SAFE_INTEGER;
+        // --- FILTRO POR DORMITORIOS ---
+        if (filterBedrooms !== 'any') {
+            const minBedrooms = parseInt(filterBedrooms.replace('+', ''), 10);
+            result = result.filter(p => p.bedrooms >= minBedrooms);
+        }
 
-      result = result.filter(p => {
-        let priceInCLP = 0;
-        const currency = p.currency.trim();
-        
-        if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
-        else if (currency === '$' || currency === 'USD') priceInCLP = p.price * USD_VALUE_CLP;
-        else if (currency === '€') priceInCLP = p.price * EUR_VALUE_CLP;
-        else priceInCLP = p.price;
+        // --- FILTRO POR PRECIO (Complejo: Necesita convertir todo a CLP para comparar) ---
+        if (filterPrice !== 'any') {
+            const [minStr, maxStr] = filterPrice.split('-');
+            const minClp = parseInt(minStr, 10);
+            const maxClp = parseInt(maxStr, 10);
 
-        return priceInCLP >= min && priceInCLP <= max;
-      });
-    }
+            result = result.filter(p => {
+                let priceInClp = 0;
+                const price = p.price;
+                const currency = p.currency.trim();
+                
+                // Conversión de precio de la propiedad a CLP
+                if (currency === 'UF') {
+                    priceInClp = price * UF_VALUE_CLP;
+                } else if (currency === '$' || currency === 'USD') {
+                    // Usar un valor fijo para USD/CLP. Esto es una simplificación.
+                    priceInClp = price * 950; 
+                } else if (currency === '€' || currency === 'EUR') {
+                    // Usar un valor fijo para EUR/CLP.
+                    priceInClp = price * 1020; 
+                } else {
+                    // Asumir que cualquier otra cosa (incluyendo CLP) es el precio nominal
+                    priceInClp = price;
+                }
 
-    setFilteredProperties(result);
-    // searchFilters se mantiene como dependencia para que el filtro se re-ejecute
-    // cuando App.tsx pasa una nueva lista de `properties` después de una búsqueda Hero.
-  }, [properties, filterMinPrice, filterMaxPrice, filterBedrooms, filterType, searchFilters]); 
+                return priceInClp >= minClp && priceInClp <= maxClp;
+            });
+        }
 
-  const handleClearLocalFilters = () => {
-    setFilterMinPrice('');
-    setFilterMaxPrice('');
-    setFilterBedrooms(0);
-    setFilterType('all');
-    // Llama a la función en App.tsx para limpiar los filtros globales si los hay
-    // y forzar la recarga de la lista completa (a través del cambio de `properties`).
-    if (searchFilters) {
-      onClearFilters(); // Esto reinicia searchFilters en App.tsx
-    }
-  };
+        setFilteredProperties(result);
+    }, [properties, filterType, filterBedrooms, filterPrice]);
 
-  // --- Title Logic ---
-  let title = category;
-  const knownCities = ['Concepción', 'Chiguayante', 'San Pedro de la Paz', 'Talcahuano', 'Coronel', 'Penco', 'Los Ángeles'];
-  
-  if (knownCities.includes(category)) {
-    title = `Propiedades en ${category}`;
-  } else if (category === 'Bienes Raíces') {
-    title = 'Propiedades en Venta';
-  } else if (category === 'Premium Property') {
-    title = 'Colección Premium';
-  } else if (category === 'Resultados de Búsqueda') { // Si viene de una búsqueda de Hero
-    title = 'Resultados de Búsqueda';
-  }
+    // Manejo de la navegación a la vista de detalles
+    const handleCardClick = (property: Property) => {
+        onSelectProperty(property);
+    };
 
+    return (
+        <div className="bg-white py-12 md:py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                {/* TÍTULO Y CONTEO */}
+                <div className="mb-8">
+                    <h2 className="font-serif text-3xl font-light text-leroy-black">{categoryTitle}</h2>
+                    <p className="text-gray-500 mt-1">Mostrando {filteredProperties.length} propiedades disponibles</p>
+                </div>
 
-  return (
-    <div className="min-h-screen bg-white pt-24 pb-20 font-sans">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Breadcrumbs */}
-        <nav className="flex items-center text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-6">
-          <button onClick={onGoHome} className="hover:text-leroy-black transition-colors">Inicio</button>
-          <span className="mx-2">/</span>
-          <span className="text-leroy-black">{title}</span>
-        </nav>
+                {/* BARRA DE FILTROS SECUNDARIOS */}
+                <div className="mb-10 p-4 border border-gray-100 bg-gray-50">
+                    <div className="flex flex-wrap gap-4 items-center">
+                        
+                        {/* Filtro por Tipo */}
+                        <select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="p-2 border border-gray-300 text-sm focus:border-leroy-gold focus:ring-leroy-gold appearance-none"
+                        >
+                            {propertyTypeOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
+                        
+                        {/* Filtro por Habitaciones */}
+                        <select
+                            value={filterBedrooms}
+                            onChange={(e) => setFilterBedrooms(e.target.value)}
+                            className="p-2 border border-gray-300 text-sm focus:border-leroy-gold focus:ring-leroy-gold appearance-none"
+                        >
+                            {bedroomsOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
 
-        {/* Header - Title and Count */}
-        <div className="mb-6">
-            <h1 className="font-serif text-3xl text-leroy-black mb-2">
-              {title}
-            </h1>
-            <p className="text-gray-500 font-light text-sm">
-               {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad encontrada' : 'propiedades encontradas'}
-            </p>
-        </div>
+                        {/* Filtro por Precio */}
+                        <select
+                            value={filterPrice}
+                            onChange={(e) => setFilterPrice(e.target.value)}
+                            className="p-2 border border-gray-300 text-sm focus:border-leroy-gold focus:ring-leroy-gold appearance-none"
+                        >
+                            {priceRangeOptions.map(option => (
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            ))}
+                        </select>
 
-        {/* Filter Bar - Sticky */}
-        <div className="sticky top-[70px] z-30 bg-white border-y border-gray-200 py-3 mb-8 -mx-4 px-4 md:mx-0 md:px-0 shadow-sm">
-           <div className="flex flex-wrap items-center justify-between gap-4">
-              
-              {/* Left: Filters */}
-              <div className="flex flex-wrap items-center gap-2">
-                 
-                 {/* Type Filter */}
-                 <div className="relative group">
-                    <select 
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 text-xs font-bold uppercase tracking-widest hover:border-gray-800 focus:outline-none focus:border-leroy-black transition-colors cursor-pointer min-w-[140px]"
-                    >
-                        <option value="all">Tipo: Todos</option>
-                        {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                 </div>
+                        {/* Botón de Reset */}
+                        <button
+                            onClick={() => {
+                                setFilterType('any');
+                                setFilterPrice('any');
+                                setFilterBedrooms('any');
+                            }}
+                            className="text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-leroy-black transition-colors ml-auto"
+                        >
+                            Restablecer Filtros
+                        </button>
 
-                 {/* Bedrooms Filter */}
-                 <div className="relative group">
-                    <select 
-                        value={filterBedrooms}
-                        onChange={(e) => setFilterBedrooms(Number(e.target.value))}
-                        className="appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 text-xs font-bold uppercase tracking-widest hover:border-gray-800 focus:outline-none focus:border-leroy-black transition-colors cursor-pointer min-w-[140px]"
-                    >
-                        <option value={0}>Dormitorios</option>
-                        <option value={1}>1+</option>
-                        <option value={2}>2+</option>
-                        <option value={3}>3+</option>
-                        <option value={4}>4+</option>
-                        <option value={5}>5+</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                 </div>
+                    </div>
+                </div>
+                
+                {/* LISTADO DE PROPIEDADES */}
+                {filteredProperties.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {filteredProperties.map(property => (
+                            <PropertyCard 
+                                key={property.id} 
+                                property={property} 
+                                onClick={() => handleCardClick(property)}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16 border border-gray-100 bg-gray-50 mt-8">
+                        <p className="text-xl text-gray-600 font-serif">
+                            No se encontraron propiedades que coincidan con sus filtros.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setFilterType('any');
+                                setFilterPrice('any');
+                                setFilterBedrooms('any');
+                            }}
+                            className="mt-4 text-leroy-gold hover:underline font-bold"
+                        >
+                            Ver todas las propiedades
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
-                 {/* Price Filter Button */}
-                 <div className="relative">
-                    <button 
-                        onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                        className={`border py-2 px-4 text-xs font-bold uppercase tracking-widest hover:border-gray-800 transition-colors bg-white flex items-center gap-2 ${filterMinPrice || filterMaxPrice ? 'border-leroy-black text-leroy-black' : 'border-gray-300 text-gray-700'}`}
-                    >
-                        Precio {filterMinPrice || filterMaxPrice ? '*' : ''}
-                        <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </button>
-                    
-                    {/* Price Dropdown */}
-                    {isFiltersOpen && (
-                        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 shadow-xl p-6 w-72 z-50 animate-in slide-in-from-top-2">
-                            <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Rango de Precio (CLP)</h3>
-                            <div className="space-y-4">
+export default ListingView;
