@@ -1,9 +1,12 @@
+// components/AdminView.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
-// Asumo que estos types y constantes existen en tus archivos
-// import { Property, PropertyType, PrivateData } from '../types'; 
+// Si usas estos archivos reales, descomenta las siguientes líneas:
+// import { Property, PropertyType, PrivateData } from '../types'; 
 // import { COMMUNES } from '../constants';
 
-// --- SIMULACIÓN DE TYPES Y CONSTANTES (Reemplazar con tus archivos) ---
+// --- SIMULACIÓN DE TYPES Y CONSTANTES (Reemplazar con tus archivos reales) ---
+// La simulación se usa para que el componente sea autocontenido y funcione sin errores de importación directa.
 enum PropertyType {
     VILLA = 'Villa',
     APARTMENT = 'Apartamento',
@@ -44,17 +47,17 @@ const COMMUNES = [
 ];
 // ---------------------------------------------------------------------
 
-
 const ADMIN_PASSWORD = 'C4s4sL3r0y!2026';
 
-// Interfaz de Propiedades de AdminView (CORREGIDA)
+// Interfaz de Propiedades de AdminView (CORREGIDA para evitar el error TS2322)
 interface AdminViewProps {
-    properties: Property[]; // Lista de todas las propiedades (para la tabla)
-    // CORRECCIÓN: Las funciones de CRUD en App.tsx son ASÍNCRONAS, por lo tanto, devuelven Promise<void>
+    properties: Property[];
+    // Funciones CRUD asíncronas
     onAddProperty: (property: Property) => Promise<void>; 
-    onUpdateProperty: (property: Property) => Promise<void>; // Para guardar cambios
-    onDeleteProperty: (id: string) => Promise<void>;         // Para eliminar
-    onCancel: () => void; // Usado para 'Volver al Inicio' / 'Cerrar Sesión'
+    onUpdateProperty: (property: Property) => Promise<void>;
+    onDeleteProperty: (id: string) => Promise<void>; 
+    onCancel: () => void; // Para 'Volver al Inicio' / 'Cerrar Sesión'
+    // Se elimina onNavigate: (view: string, category?: string) => void;
 }
 
 const COMMON_AMENITIES = [
@@ -63,13 +66,12 @@ const COMMON_AMENITIES = [
     'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
 ];
 
-// Hacer el componente AdminView ASÍNCRONO para poder usar 'await' con los props
-const AdminView: React.FC<AdminViewProps> = ({ 
-    properties, 
-    onAddProperty, 
-    onUpdateProperty, 
-    onDeleteProperty, 
-    onCancel 
+const AdminView: React.FC<AdminViewProps> = ({ 
+    properties, 
+    onAddProperty, 
+    onUpdateProperty, 
+    onDeleteProperty, 
+    onCancel 
 }) => {
     
     // 1. Estados de Autenticación
@@ -79,17 +81,15 @@ const AdminView: React.FC<AdminViewProps> = ({ 
     
     // 2. Estados de Edición / Gestión
     const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-    const [isNewProperty, setIsNewProperty] = useState(false); 
+    const [isNewProperty, setIsNewProperty] = useState(false); 
     
     // 3. Estados del Formulario (todos inicializados con valores controlados)
-    const [id, setId] = useState<string | null>(null); 
+    const [id, setId] = useState<string | null>(null); 
     const [title, setTitle] = useState('');
     const [subtitle, setSubtitle] = useState('');
-    // Usamos el primer elemento por defecto
     const [location, setLocation] = useState(COMMUNES.length > 0 ? COMMUNES[0] : '');
-    // Uso de string para Price, Area, Bedrooms, Bathrooms en el input (más limpio para formularios)
     const [priceInput, setPriceInput] = useState('0');
-    const [currency, setCurrency] = useState<'UF' | '$' | 'USD' | '€'>('UF'); 
+    const [currency, setCurrency] = useState<'UF' | '$' | 'USD' | '€'>('UF'); 
     const [type, setType] = useState<PropertyType>(PropertyType.VILLA);
     const [bedroomsInput, setBedroomsInput] = useState('1');
     const [bathroomsInput, setBathroomsInput] = useState('1');
@@ -97,8 +97,8 @@ const AdminView: React.FC<AdminViewProps> = ({ 
     const [imageUrl, setImageUrl] = useState('');
     const [description, setDescription] = useState('');
     const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-    const [isPremium, setIsPremium] = useState(false); 
-    const [isPublished, setIsPublished] = useState(false); 
+    const [isPremium, setIsPremium] = useState(false); 
+    const [isPublished, setIsPublished] = useState(false); 
     
     // Private Data State
     const [ownerName, setOwnerName] = useState('');
@@ -163,11 +163,7 @@ const AdminView: React.FC<AdminViewProps> = ({ 
             
             setIsNewProperty(false);
         } else if (isNewProperty) {
-            // Si es propiedad nueva, reseteamos asegurando que el id es null
-            // Uso de resetForm para consistencia, aunque se haga un reset al entrar en modo 'nuevo'
-            // Podríamos evitar llamar a resetForm si ya se hizo en handleCreateNew,
-            // pero lo dejamos para robustez si el isNewProperty cambia por otra vía.
-            // Para simplificar, la lógica de `handleCreateNew` y `handleEdit` ahora son responsables.
+            // Si es propiedad nueva, el resetForm ya se encargó de inicializar
         }
     }, [editingProperty, isNewProperty, resetForm]);
     
@@ -184,17 +180,17 @@ const AdminView: React.FC<AdminViewProps> = ({ 
     };
     
     const toggleAmenity = (amenity: string) => {
-        setSelectedAmenities(prev => 
+        setSelectedAmenities(prev => 
             prev.includes(amenity)
                 ? prev.filter(a => a !== amenity)
                 : [...prev, amenity]
         );
     };
 
-    // Lógica de Envío del Formulario (Añadir O Actualizar) - AHORA ASÍNCRONA
+    // Lógica de Envío del Formulario (Añadir O Actualizar) - ASÍNCRONA
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!isAuthenticated) return; 
+        if (!isAuthenticated) return; 
 
         // 💡 Convertir inputs de string a number y asegurar valores por defecto/mínimos
         const parsedPrice = parseInt(priceInput) || 0;
@@ -216,11 +212,11 @@ const AdminView: React.FC<AdminViewProps> = ({ 
             bedrooms: parsedBedrooms,
             bathrooms: parsedBathrooms,
             area: parsedArea,
-            imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
+            imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
             description: description.trim(),
             amenities: selectedAmenities,
-            isPremium, 
-            isPublished, 
+            isPremium, 
+            isPublished, 
             privateData: {
                 ownerName: ownerName.trim(),
                 ownerPhone: ownerPhone.trim(),
@@ -232,15 +228,17 @@ const AdminView: React.FC<AdminViewProps> = ({ 
         try {
             if (id) {
                 // MODO EDICIÓN: Llama a la función de actualización
-                await onUpdateProperty(propertyData); 
+                await onUpdateProperty(propertyData); 
+                alert('Propiedad actualizada con éxito.');
             } else {
                 // MODO NUEVO: Llama a la función de adición
                 await onAddProperty(propertyData);
+                alert('Propiedad creada con éxito.');
             }
             
             resetForm(); // Limpia el formulario y sale del modo edición/creación
         } catch (submitError) {
-            // Manejo de errores de la API, si las funciones pasadas (onAdd/onUpdate) los lanzan
+            // Manejo de errores de la API
             console.error('Error al guardar la propiedad:', submitError);
             alert('Error al guardar la propiedad. Consulte la consola para más detalles.');
         }
@@ -248,24 +246,25 @@ const AdminView: React.FC<AdminViewProps> = ({ 
     
     // Funciones de control de la tabla
     const handleEdit = (property: Property) => {
-        // Establecer la propiedad para que el useEffect la precargue
-        setEditingProperty(property); 
-        setIsNewProperty(false); 
+        setEditingProperty(property); 
+        setIsNewProperty(false); 
     };
     
     const handleCreateNew = () => {
-        // Limpia el formulario ANTES de entrar en modo creación
         resetForm();
-        setIsNewProperty(true); 
+        setIsNewProperty(true); 
     };
 
-    // Función de eliminación - AHORA ASÍNCRONA
+    // Función de eliminación - ASÍNCRONA
     const handleDelete = async (propertyId: string) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar esta propiedad? Esta acción es permanente.')) {
             try {
-                // Llamar a la función asíncrona pasada por prop
                 await onDeleteProperty(propertyId);
-                // Si la eliminación fue exitosa, no hace falta recargar, App.tsx ya lo hace
+                alert('Propiedad eliminada con éxito.');
+                // Si estaba editando la que se eliminó, resetear el formulario
+                if (editingProperty && editingProperty.id === propertyId) {
+                    resetForm();
+                }
             } catch (deleteError) {
                 console.error('Error al eliminar la propiedad:', deleteError);
                 alert('Error al eliminar la propiedad. Consulte la consola para más detalles.');
@@ -298,7 +297,7 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                         Ingresar
                     </button>
                     {error && <p className="text-red-500 text-xs mt-3 text-center">{error}</p>}
-                    <button onClick={onCancel} className="w-full text-center mt-4 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-black">
+                    <button type="button" onClick={onCancel} className="w-full text-center mt-4 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-black">
                         Volver al Inicio
                     </button>
                 </div>
@@ -314,13 +313,13 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="font-serif text-3xl text-leroy-black">Gestión de Propiedades ({properties.length})</h1>
                         <div className="flex space-x-4">
-                            <button 
-                                onClick={handleCreateNew} 
+                            <button 
+                                onClick={handleCreateNew} 
                                 className="bg-leroy-gold text-white px-6 py-3 rounded text-xs font-bold uppercase tracking-widest hover:bg-yellow-600 transition-colors"
                             >
                                 + Crear Nueva Propiedad
                             </button>
-                            <button onClick={onCancel} className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black">
+                            <button type="button" onClick={onCancel} className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black">
                                 Cerrar Sesión
                             </button>
                         </div>
@@ -334,7 +333,7 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th> {/* Añadido Tipo */}
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                                 </tr>
@@ -347,21 +346,21 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {property.currency} {property.price.toLocaleString('es-CL')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{property.type}</td> {/* Mostrar Tipo */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{property.type}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.isPublished ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                                                 {property.isPublished ? 'Publicada' : 'Borrador'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button 
-                                                onClick={() => handleEdit(property)} 
+                                            <button 
+                                                onClick={() => handleEdit(property)} 
                                                 className="text-leroy-black hover:text-leroy-gold mr-3 transition-colors"
                                             >
                                                 Editar
                                             </button>
-                                            <button 
-                                                onClick={() => handleDelete(property.id)} 
+                                            <button 
+                                                onClick={() => handleDelete(property.id)} 
                                                 className="text-red-600 hover:text-red-900 transition-colors"
                                             >
                                                 Eliminar
@@ -392,8 +391,8 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                     
                     {/* --- CONTROL DE ESTADO --- */}
                     <div className="flex justify-between items-center border-b pb-4 mb-6">
-                        <button 
-                            type="button" 
+                        <button 
+                            type="button" 
                             onClick={resetForm} // Vuelve a la lista de gestión
                             className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black transition-colors"
                         >
@@ -465,8 +464,7 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                             <label htmlFor="type" className="block text-sm font-medium leading-6 text-gray-900">Tipo de Propiedad</label>
                             <select
                                 id="type" required
-                                // Asegurar que el valor es de tipo PropertyType
-                                value={type} onChange={(e) => setType(e.target.value as PropertyType)} 
+                                value={type} onChange={(e) => setType(e.target.value as PropertyType)} 
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
                             >
                                 {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
@@ -480,7 +478,6 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                             <label htmlFor="price" className="block text-sm font-medium leading-6 text-gray-900">Precio</label>
                             <input
                                 type="number" id="price" required min="0" step="1"
-                                // Uso de priceInput (string) para mejor control de input numérico
                                 value={priceInput} onChange={(e) => setPriceInput(e.target.value)}
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
                             />
@@ -489,7 +486,6 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                             <label htmlFor="currency" className="block text-sm font-medium leading-6 text-gray-900">Moneda</label>
                             <select
                                 id="currency" required
-                                // Forzar el tipo de currency para mantener consistencia
                                 value={currency} onChange={(e) => setCurrency(e.target.value as 'UF' | '$' | 'USD' | '€')}
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
                             >
@@ -562,71 +558,78 @@ const AdminView: React.FC<AdminViewProps> = ({ 
                                         type="checkbox"
                                         checked={selectedAmenities.includes(amenity)}
                                         onChange={() => toggleAmenity(amenity)}
-                                        className="h-4 w-4 rounded border-gray-300 text-leroy-gold focus:ring-leroy-gold"
+                                        className="h-4 w-4 text-leroy-gold border-gray-300 rounded focus:ring-leroy-gold"
                                     />
-                                    <label htmlFor={`amenity-${amenity}`} className="ml-3 text-sm text-gray-600">{amenity}</label>
+                                    <label htmlFor={`amenity-${amenity}`} className="ml-2 block text-sm text-gray-900">
+                                        {amenity}
+                                    </label>
                                 </div>
                             ))}
                         </div>
                     </div>
+                    
 
                     {/* --- SECCIÓN DATOS PRIVADOS --- */}
-                    <div className="border-b border-gray-200 pb-5 pt-8">
-                        <h2 className="text-xl font-semibold leading-7 text-red-700">2. Datos Privados (Confidencial)</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">Solo para uso interno: información de contacto del dueño y legal.</p>
+                    <div className="border-t border-gray-200 pt-8 mt-8">
+                        <h2 className="text-xl font-semibold leading-7 text-gray-900">2. Información Privada (Administración)</h2>
+                        <p className="mt-1 text-sm leading-6 text-gray-600">Estos detalles son internos y no se publican.</p>
                     </div>
-                    
-                    {/* Dueño y Contacto */}
+
                     <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                        {/* Dueño y Teléfono */}
                         <div className="sm:col-span-3">
                             <label htmlFor="ownerName" className="block text-sm font-medium leading-6 text-gray-900">Nombre del Propietario</label>
                             <input
-                                type="text" id="ownerName" required
+                                type="text" id="ownerName"
                                 value={ownerName} onChange={(e) => setOwnerName(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
                             />
                         </div>
                         <div className="sm:col-span-3">
                             <label htmlFor="ownerPhone" className="block text-sm font-medium leading-6 text-gray-900">Teléfono del Propietario</label>
                             <input
-                                type="tel" id="ownerPhone" required
+                                type="tel" id="ownerPhone"
                                 value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
                             />
                         </div>
-                        {/* Continuación de Datos Privados */}
+
+                        {/* Descripción Legal */}
                         <div className="sm:col-span-6">
-                            <label htmlFor="legalDescription" className="block text-sm font-medium leading-6 text-gray-900">Descripción Legal (Notas de Escritura)</label>
+                            <label htmlFor="legalDescription" className="block text-sm font-medium leading-6 text-gray-900">Descripción Legal / Rol</label>
                             <textarea
-                                id="legalDescription" rows={3}
+                                id="legalDescription" rows={2}
                                 value={legalDescription} onChange={(e) => setLegalDescription(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
-                                placeholder="Especifique número de rol, metros legales, cargas, etc."
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                                placeholder="Datos legales, rol, y cualquier identificador."
                             />
                         </div>
+                        
+                        {/* Notas Privadas */}
                         <div className="sm:col-span-6">
                             <label htmlFor="privateNotes" className="block text-sm font-medium leading-6 text-gray-900">Notas Internas</label>
                             <textarea
                                 id="privateNotes" rows={3}
                                 value={privateNotes} onChange={(e) => setPrivateNotes(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6"
-                                placeholder="Notas internas para el equipo: comisión, estado de visita, urgencia de venta..."
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                                placeholder="Notas internas para el equipo de ventas o administración."
                             />
                         </div>
                     </div>
-                    
-                    {/* Botones de Acción Final */}
-                    <div className="mt-8 flex justify-end gap-x-6 pt-5 border-t border-gray-200">
+
+
+                    {/* --- BOTONES DE ACCIÓN --- */}
+                    <div className="pt-5 border-t mt-8 flex justify-end">
                         <button
                             type="button"
                             onClick={resetForm}
-                            className="text-sm font-semibold leading-6 text-gray-900 hover:text-gray-700 transition-colors"
+                            className="mr-4 text-sm font-semibold leading-6 text-gray-900 hover:text-red-600 transition-colors"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
-                            className="rounded-md bg-leroy-gold px-5 py-2 text-sm font-bold text-white shadow-sm hover:bg-yellow-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leroy-gold transition-colors"
+                            className="inline-flex justify-center rounded-md bg-leroy-black px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leroy-gold"
                         >
                             {id ? 'Guardar Cambios' : 'Crear Propiedad'}
                         </button>
