@@ -5,6 +5,7 @@ import { COMMUNES } from '../constants';
 interface HeroProps {
   onSearch: (filters: HeroSearchState) => void;
   isSearching: boolean;
+  onNavigate?: (view: string, category?: string) => void;
 }
 
 const HERO_IMAGES = [
