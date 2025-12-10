@@ -82,6 +82,11 @@ const App: React.FC = () => {
   const getFilteredProperties = () => {
     let filtered = properties;
 
+    // Aplicar filtro de publicación: Si NO estamos en admin, solo mostrar publicadas
+    if (currentView !== 'admin') {
+        filtered = filtered.filter(p => p.isPublished);
+    }
+
     if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') {
       if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
       } else if (selectedCategory === 'Premium Property') {
@@ -136,12 +141,12 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-2 mt-4 md:mt-0">
                      <button onClick={() => handleNavigate('listing', 'Bienes Raíces')} className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70 transition-opacity">
-                        Ver cartera completa &rarr;
+                         Ver cartera completa &rarr;
                      </button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                  {properties.slice(0, 6).map(property => (
+                  {getFilteredProperties().slice(0, 6).map(property => ( 
                     <div key={property.id} className="h-full">
                       <PropertyCard 
                         property={property} 
@@ -171,7 +176,7 @@ const App: React.FC = () => {
                       <div className="w-24 h-1 bg-leroy-gold mx-auto"></div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                       <div className="px-4 py-4">
+                      <div className="px-4 py-4">
                             <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">+15</div>
                             <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Años de Experiencia</div>
                        </div>
