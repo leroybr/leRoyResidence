@@ -6,7 +6,8 @@ export enum PropertyType {
     PENTHOUSE = 'Penthouse',
     MANSION = 'Mansión',
     ESTATE = 'Finca',
-    HOUSE = 'Casa', // <--- ¡CORREGIDO! Faltaba 'HOUSE'
+    HOUSE = 'Casa',        // CORRECCIÓN: Faltaba 'HOUSE'
+    LAND = 'Terreno',      // CORRECCIÓN: Faltaba 'LAND'
     UNKNOWN = 'Desconocido'
 }
 
