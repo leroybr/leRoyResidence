@@ -1,11 +1,9 @@
 import React from 'react';
 import { Property } from '../types';
 
-// La CORRECCIÓN CLAVE se encuentra aquí:
 interface PropertyCardProps {
   property: Property;
   onClick: () => void;
-  // Se añade 'onGoHome' (opcional) para aceptar la prop que App.tsx intenta pasar.
   onGoHome?: () => void; 
 }
 
@@ -17,7 +15,6 @@ const formatCLP = (amount: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 
-// Se desestructura 'onGoHome' para evitar el error TS6133 y TS2322.
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, onGoHome }) => {
   let mainPriceDisplay = '';
   let secondaryPriceDisplay = '';
