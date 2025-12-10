@@ -9,7 +9,7 @@ interface ListingViewProps {
     category: string;
     searchFilters: HeroSearchState | null;
     onPropertyClick: (property: Property) => void;
-    onNavigate: (view: string, category?: string) => void; // Se mantiene y se usa para corregir el error TS6133
+    onNavigate: (view: string, category?: string) => void; 
 }
 
 const ListingView: React.FC<ListingViewProps> = ({ 
@@ -17,29 +17,33 @@ const ListingView: React.FC<ListingViewProps> = ({
     category, 
     searchFilters, 
     onPropertyClick, 
-    onNavigate // Se desestructura para USARLA y corregir el error de compilación
+    onNavigate // Se desestructura y se usa para corregir el error de compilación
 }) => {
     
     // Función de ayuda para formatear el precio
     const formatPrice = (price: number, currency: string): string => {
-        const formatter = new Intl.NumberFormat('es-CL', {
-            style: 'currency',
-            currency: currency === 'UF' ? 'CLP' : currency,
-            minimumFractionDigits: 0,
-        });
+        // En un caso real, la conversión de moneda debe ser dinámica.
+        // Aquí se usa un formateo básico basado en el código de tu App.tsx.
         
-        // Asumiendo que las monedas comunes son UF, USD, EUR y que CLP es el predeterminado si no se encuentra
+        const priceValue = price.toLocaleString('es-CL', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+
+        // Usamos símbolos comunes, asumiendo UF y la conversión interna en App.tsx.
         if (currency === 'UF') {
-            return `UF ${price.toLocaleString('es-CL')}`;
+            return `UF ${priceValue}`;
         }
-        return formatter.format(price);
+        
+        // Asumiendo que USD, EUR o CLP se pasan como el símbolo
+        return `${currency} ${priceValue}`;
     };
 
     return (
         <div className="pt-32 p-8 bg-white min-h-screen">
             <div className="max-w-7xl mx-auto">
                 
-                {/* Botón de Navegación: CORRECCIÓN para el error TS6133 */}
+                {/* Botón de Navegación: CORRECCIÓN para el error TS6133 (prop declarada pero no usada) */}
                 <button 
                     onClick={() => onNavigate('home')} 
                     className="mb-8 text-sm text-black hover:text-gray-600 font-bold flex items-center transition duration-150"
@@ -69,14 +73,15 @@ const ListingView: React.FC<ListingViewProps> = ({
                             onClick={() => onPropertyClick(property)}
                             className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition duration-300 transform hover:-translate-y-1"
                         >
+                            {/* La URL de la imagen debe ser válida en tu sistema */}
                             <img 
-                                src={property.imageUrl} 
+                                src={property.imageUrl || 'placeholder.jpg'} 
                                 alt={property.title} 
                                 className="w-full h-48 object-cover"
                             />
                             <div className="p-5">
                                 <span className="text-xs font-semibold text-orange-600 uppercase tracking-wider">
-                                    {PropertyType[property.type as keyof typeof PropertyType]}
+                                    {PropertyType[property.type as keyof typeof PropertyType] || property.type}
                                 </span>
                                 <h2 className="text-2xl font-bold text-gray-900 mt-1 mb-2 truncate">
                                     {property.title}
