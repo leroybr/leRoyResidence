@@ -8,17 +8,24 @@ interface ListingViewProps {
   onPropertyClick: (property: Property) => void;
   onGoHome: () => void;
   onClearFilters: () => void;
+  onNavigate: (view: string, category?: string) => void;
 }
 
 const UF_VALUE_CLP = 37800;
 const USD_VALUE_CLP = 950;
 const EUR_VALUE_CLP = 1020;
 
-const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPropertyClick, onGoHome, onClearFilters }) => {
+const ListingView: React.FC<ListingViewProps> = ({ 
+  category, 
+  properties, 
+  onPropertyClick, 
+  onGoHome, 
+  onClearFilters,
+  onNavigate 
+}) => {
   const knownCities = ['Concepción', 'Chiguayante', 'San Pedro de la Paz', 'Talcahuano', 'Coronel', 'Penco', 'Los Ángeles'];
   const isCity = knownCities.includes(category);
   
-  // --- Local Filter State ---
   const [showFilters, setShowFilters] = useState(false);
   const [filterMinPrice, setFilterMinPrice] = useState<string>('');
   const [filterMaxPrice, setFilterMaxPrice] = useState<string>('');
@@ -26,30 +33,25 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
   const [filterType, setFilterType] = useState<string>('all');
   const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
 
-  // Reset local filters when category changes
   useEffect(() => {
     setFilterMinPrice('');
     setFilterMaxPrice('');
     setFilterBedrooms(0);
     setFilterType('all');
-    setShowFilters(false); // Hide filters on navigation
+    setShowFilters(false);
   }, [category]);
 
-  // Apply filters whenever inputs or properties change
   useEffect(() => {
     let result = properties;
 
-    // 1. Filter by Type
     if (filterType !== 'all') {
       result = result.filter(p => p.type === filterType);
     }
 
-    // 2. Filter by Bedrooms
     if (filterBedrooms > 0) {
       result = result.filter(p => p.bedrooms >= filterBedrooms);
     }
 
-    // 3. Filter by Price (Normalize everything to CLP for comparison)
     if (filterMinPrice || filterMaxPrice) {
       const min = filterMinPrice ? parseInt(filterMinPrice) : 0;
       const max = filterMaxPrice ? parseInt(filterMaxPrice) : Number.MAX_SAFE_INTEGER;
@@ -61,7 +63,7 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
         if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
         else if (currency === '$' || currency === 'USD') priceInCLP = p.price * USD_VALUE_CLP;
         else if (currency === '€') priceInCLP = p.price * EUR_VALUE_CLP;
-        else priceInCLP = p.price; // Assuming CLP if undefined or other
+        else priceInCLP = p.price;
 
         return priceInCLP >= min && priceInCLP <= max;
       });
@@ -78,13 +80,12 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
     onClearFilters(); 
   };
   
-  // --- Title Logic ---
   let title = category;
   
   if (isCity) {
     title = `Inmuebles en ${category}`;
   } else if (category === 'Bienes Raíces') {
-    title = 'Inmuebles en Concepción'; // Default title adjustment requested
+    title = 'Inmuebles en Concepción';
   } else if (category === 'Show room Cocinas') {
     title = 'Nuevas tecnologías en la Cocina';
   } else if (category === 'Desarrollos') {
@@ -92,16 +93,15 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
   } else if (category === 'Premium Property') {
     title = 'Propiedades Premium';
   } else if (category.includes('Dorm') || category.includes('Precio')) {
-     title = `Resultados: ${category}`;
+      title = `Resultados: ${category}`;
   } else if (!category || category === 'Resultados de Búsqueda') {
-     title = 'Resultados de Búsqueda';
+    title = 'Resultados de Búsqueda';
   }
 
   return (
     <div className="pt-32 pb-20 min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Breadcrumb / Back */}
         <div className="mb-4">
           <button 
             onClick={onGoHome}
@@ -114,30 +114,26 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
           </button>
         </div>
 
-        {/* Title */}
         <div className="mb-6">
            <h1 className="font-serif text-3xl md:text-4xl text-black capitalize tracking-tight leading-none">
-              {title}
-            </h1>
+             {title}
+           </h1>
         </div>
 
-        {/* Buttons Bar - Only Filters button now */}
         <div className="flex flex-wrap items-center gap-3 mb-10 overflow-x-auto pb-2 no-scrollbar">
-           {/* Filters Toggle Button */}
-           <button 
+            <button 
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center bg-black text-white px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shrink-0"
-           >
+            >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
-                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
               </svg>
               Filtros
-           </button>
+            </button>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 relative">
           
-          {/* --- SIDEBAR FILTERS (Conditionally Rendered) --- */}
           {showFilters && (
             <aside className="w-full lg:w-72 flex-shrink-0 space-y-8 animate-in slide-in-from-left-4 duration-300">
               <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -148,7 +144,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
                    </button>
                 </div>
                 
-                {/* Price Filter */}
                 <div className="mb-6">
                   <label className="block text-[10px] font-bold uppercase text-black mb-2 tracking-widest">Precio (CLP)</label>
                   <div className="space-y-3">
@@ -169,7 +164,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
                   </div>
                 </div>
 
-                {/* Bedrooms Filter */}
                 <div className="mb-6">
                   <label className="block text-[10px] font-bold uppercase text-black mb-2 tracking-widest">Dormitorios</label>
                   <select 
@@ -186,7 +180,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
                   </select>
                 </div>
 
-                {/* Property Type Filter */}
                 <div className="mb-6">
                   <label className="block text-[10px] font-bold uppercase text-black mb-2 tracking-widest">Tipo de Propiedad</label>
                   <select 
@@ -201,7 +194,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
                   </select>
                 </div>
 
-                {/* Clear Button */}
                 <button 
                   onClick={handleClearLocalFilters}
                   className="w-full bg-gray-100 border border-transparent text-black py-3 text-[10px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors rounded-md"
@@ -212,7 +204,6 @@ const ListingView: React.FC<ListingViewProps> = ({ category, properties, onPrope
             </aside>
           )}
 
-          {/* --- MAIN GRID --- */}
           <div className="flex-1">
             {filteredProperties.length > 0 ? (
               <div className={`grid grid-cols-1 md:grid-cols-2 ${showFilters ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-3'} gap-x-6 gap-y-12`}>
