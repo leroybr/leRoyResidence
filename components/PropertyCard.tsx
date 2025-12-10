@@ -4,6 +4,8 @@ import { Property } from '../types';
 interface PropertyCardProps {
   property: Property;
   onClick: () => void;
+  // 💡 CORRECCIÓN para TS2322: Se añade 'onGoHome' como opcional para resolver el error de tipado en App.tsx.
+  onGoHome?: () => void; 
 }
 
 const UF_VALUE_CLP = 37800;
