@@ -1,4 +1,4 @@
-// types.ts
+// types.ts (CORREGIDO)
 
 export enum PropertyType {
     VILLA = 'Villa',
@@ -6,8 +6,12 @@ export enum PropertyType {
     PENTHOUSE = 'Penthouse',
     MANSION = 'Mansión',
     ESTATE = 'Finca',
-    HOUSE = 'Casa',        // CORRECCIÓN: Faltaba 'HOUSE'
-    LAND = 'Terreno',      // CORRECCIÓN: Faltaba 'LAND'
+    HOUSE = 'Casa',
+    LAND = 'Terreno',
+    // ----------------------------------------------------------------
+    // LÍNEA AÑADIDA: El deployment fallaba porque este tipo no existía
+    // ----------------------------------------------------------------
+    COMMERCIAL = 'Comercial', 
     UNKNOWN = 'Desconocido'
 }
 
@@ -21,7 +25,7 @@ export interface PrivateData {
 export interface Property {
     id: string;
     title: string;
-    subtitle?: string; 
+    subtitle?: string;
     location: string;
     price: number;
     currency: string;
@@ -31,10 +35,10 @@ export interface Property {
     area: number; // in sq meters
     type: PropertyType;
     description: string;
-    amenities?: string[]; 
-    isPremium?: boolean; 
-    privateData?: PrivateData; 
-    isPublished: boolean; 
+    amenities?: string[];
+    isPremium?: boolean;
+    privateData?: PrivateData;
+    isPublished: boolean;
 }
 
 export interface SearchFilters {
