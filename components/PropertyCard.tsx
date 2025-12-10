@@ -2,89 +2,110 @@ import React from 'react';
 import { Property } from '../types';
 
 interface PropertyCardProps {
-  property: Property;
-  onClick: () => void;
-  // 💡 CORRECCIÓN para TS2322: Se añade 'onGoHome' como opcional para resolver el error de tipado en App.tsx.
-  onGoHome?: () => void; 
+  property: Property;
+  onClick: () => void;
 }
 
+// Valores de conversión estáticos utilizados en la tarjeta
 const UF_VALUE_CLP = 37800;
 const USD_VALUE_CLP = 950;
 const EUR_VALUE_CLP = 1020;
 
 const formatCLP = (amount: number) => {
-  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
+  return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
-  let mainPriceDisplay = '';
-  let secondaryPriceDisplay = '';
-  
-  const cleanCurrency = property.currency.trim();
-  const price = property.price;
+  let mainPriceDisplay = '';
+  let secondaryPriceDisplay = '';
+  
+  const cleanCurrency = property.currency.trim();
+  const price = property.price;
 
-  if (cleanCurrency === 'UF') {
-    mainPriceDisplay = `UF ${price.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
-    secondaryPriceDisplay = formatCLP(price * UF_VALUE_CLP);
+  if (cleanCurrency === 'UF') {
+    mainPriceDisplay = `UF ${price.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
+    secondaryPriceDisplay = formatCLP(price * UF_VALUE_CLP);
+  } else if (cleanCurrency === '$') {
+    const clp = price * USD_VALUE_CLP;
+    const uf = clp / UF_VALUE_CLP;
+    mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
+    secondaryPriceDisplay = formatCLP(clp);
+  } else if (cleanCurrency === '€') {
+    const clp = price * EUR_VALUE_CLP;
+    const uf = clp / UF_VALUE_CLP;
+    mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
+    secondaryPriceDisplay = formatCLP(clp);
+  } else {
+    mainPriceDisplay = `${cleanCurrency} ${price.toLocaleString()}`;
+  }
 
-  } else if (cleanCurrency === '$') {
-    const clp = price * USD_VALUE_CLP;
-    const uf = clp / UF_VALUE_CLP;
-    mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
-    secondaryPriceDisplay = formatCLP(clp);
+  return (
+    <div onClick={onClick} className="group cursor-pointer flex flex-col h-full bg-white hover:shadow-xl transition-all duration-300 ease-in-out border border-transparent hover:border-gray-100">
+      {/* Image Container - JamesEdition style: Clean, usually 4:3 aspect ratio */}
+      <div className="relative overflow-hidden w-full aspect-[4/3] bg-gray-100">
+        <img 
+          src={property.imageUrl} 
+          alt={`${property.type} en ${property.location} - ${property.title}`}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        
+        {/* Badges / Tags */}
+        <div className="absolute top-3 left-3 flex gap-2">
+            {property.isPremium && (
+                <span className="bg-leroy-black text-white px-2 py-1 text-[9px] font-bold tracking-widest uppercase">
+                    Premium
+                </span>
+            )}
+            <span className="bg-white/95 text-leroy-black px-2 py-1 text-[9px] font-bold tracking-widest uppercase shadow-sm">
+                {property.type}
+            </span>
+        </div>
 
-  } else if (cleanCurrency === '€') {
-    const clp = price * EUR_VALUE_CLP;
-    const uf = clp / UF_VALUE_CLP;
-    mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
-    secondaryPriceDisplay = formatCLP(clp);
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
 
-  } else {
-    mainPriceDisplay = `${cleanCurrency} ${price.toLocaleString()}`;
-  }
+      <div className="flex flex-col text-left p-5 flex-grow">
+        {/* Location - Uppercase and small */}
+        <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-2 truncate">
+          {property.location}
+        </p>
 
-  return (
-    <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
-      <div className="relative overflow-hidden w-full h-80 bg-gray-100 mb-3">
-        <img 
-          src={property.imageUrl} 
-          alt={`${property.type} en ${property.location} - ${property.title}`}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-black border border-black/5 shadow-sm">
-          {property.type}
-        </div>
-        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      </div>
+        {/* Title - Serif, elegant */}
+        <h3 className="font-serif text-lg text-leroy-black line-clamp-2 mb-3 leading-snug group-hover:text-leroy-gold transition-colors">
+          {property.title}
+        </h3>
 
-      <div className="flex flex-col text-left">
-        <div className="flex flex-col w-full items-baseline mb-2">
-            <span className="text-xl font-bold text-black">
-              {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
-            </span>
-
-            {secondaryPriceDisplay && property.price > 0 && (
-              <span className="text-xs text-gray-500 font-medium mt-0.5">
-                {secondaryPriceDisplay}
-              </span>
-            )}
-        </div>
-
-        <h3 className="font-serif text-lg text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-tight">
-          {property.title}
-        </h3>
-
-        <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2">
-          {property.location}
-        </p>
-
-        <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider pt-2 border-t border-gray-50 mt-1">
-             <span>{property.bedrooms} hab.</span>
-             <span className="w-px h-3 bg-gray-300"></span>
-             <span>{property.area} m²</span>
-        </div>
-      </div>
-    </div>
-  );
+        {/* Price - Bold */}
+        <div className="mt-auto pt-4 border-t border-gray-100">
+            <div className="flex flex-col">
+                <span className="text-lg font-bold text-leroy-black font-sans">
+                {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
+                </span>
+                {secondaryPriceDisplay && property.price > 0 && (
+                <span className="text-xs text-gray-400 font-medium mt-0.5">
+                    {secondaryPriceDisplay}
+                </span>
+                )}
+            </div>
+            
+            {/* Specs Row */}
+            <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 font-medium">
+                <div className="flex items-center gap-1">
+                    <span>{property.bedrooms}</span> <span className="text-[10px] uppercase">Hab.</span>
+                </div>
+                <div className="w-px h-3 bg-gray-300"></div>
+                <div className="flex items-center gap-1">
+                    <span>{property.bathrooms}</span> <span className="text-[10px] uppercase">Baños</span>
+                </div>
+                <div className="w-px h-3 bg-gray-300"></div>
+                <div className="flex items-center gap-1">
+                    <span>{property.area}</span> <span className="text-[10px] uppercase">m²</span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
 };
