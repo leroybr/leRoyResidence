@@ -1,120 +1,269 @@
-// components/ListingView.tsx
+import React, { useState, useEffect } from 'react';
+import { Property, PropertyType } from '../types';
+import { PropertyCard } from './PropertyCard';
 
-import React from 'react';
-import { Property, HeroSearchState, PropertyType } from '../types'; 
-
-// Definición de las interfaces de props que App.tsx le está pasando
 interface ListingViewProps {
-    properties: Property[];
-    category: string;
-    searchFilters: HeroSearchState | null;
-    onPropertyClick: (property: Property) => void;
-    onNavigate: (view: string, category?: string) => void; 
+  category: string;
+  properties: Property[];
+  onPropertyClick: (property: Property) => void;
+  onGoHome: () => void;
+  onClearFilters: () => void;
+  onNavigate: (view: string, category?: string) => void;
 }
 
-const ListingView: React.FC<ListingViewProps> = ({ 
-    properties, 
-    category, 
-    searchFilters, 
-    onPropertyClick, 
-    onNavigate // Se desestructura y se usa para corregir el error de compilación
+const UF_VALUE_CLP = 37800;
+const USD_VALUE_CLP = 950;
+const EUR_VALUE_CLP = 1020;
+
+const ListingView: React.FC<ListingViewProps> = ({
+  category,
+  properties,
+  onPropertyClick,
+  onGoHome,
+  onClearFilters,
+  onNavigate, // Used in empty state to navigate back
 }) => {
-    
-    // Función de ayuda para formatear el precio
-    const formatPrice = (price: number, currency: string): string => {
-        // En un caso real, la conversión de moneda debe ser dinámica.
-        // Aquí se usa un formateo básico basado en el código de tu App.tsx.
+  // --- Local Filter State ---
+  const [filterMinPrice, setFilterMinPrice] = useState<string>('');
+  const [filterMaxPrice, setFilterMaxPrice] = useState<string>('');
+  const [filterBedrooms, setFilterBedrooms] = useState<number>(0);
+  const [filterType, setFilterType] = useState<string>('all');
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>(properties);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  // Reset local filters when category changes
+  useEffect(() => {
+    setFilterMinPrice('');
+    setFilterMaxPrice('');
+    setFilterBedrooms(0);
+    setFilterType('all');
+    setIsFiltersOpen(false);
+  }, [category]);
+
+  // Apply filters logic
+  useEffect(() => {
+    let result = properties;
+
+    if (filterType !== 'all') {
+      result = result.filter(p => p.type === filterType);
+    }
+
+    if (filterBedrooms > 0) {
+      result = result.filter(p => p.bedrooms >= filterBedrooms);
+    }
+
+    if (filterMinPrice || filterMaxPrice) {
+      const min = filterMinPrice ? parseInt(filterMinPrice) : 0;
+      const max = filterMaxPrice ? parseInt(filterMaxPrice) : Number.MAX_SAFE_INTEGER;
+
+      result = result.filter(p => {
+        let priceInCLP = 0;
+        const currency = p.currency.trim();
         
-        const priceValue = price.toLocaleString('es-CL', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        });
+        if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
+        else if (currency === '$' || currency === 'USD') priceInCLP = p.price * USD_VALUE_CLP;
+        else if (currency === '€') priceInCLP = p.price * EUR_VALUE_CLP;
+        else priceInCLP = p.price;
 
-        // Usamos símbolos comunes, asumiendo UF y la conversión interna en App.tsx.
-        if (currency === 'UF') {
-            return `UF ${priceValue}`;
-        }
+        return priceInCLP >= min && priceInCLP <= max;
+      });
+    }
+
+    setFilteredProperties(result);
+  }, [properties, filterMinPrice, filterMaxPrice, filterBedrooms, filterType]);
+
+  const handleClearLocalFilters = () => {
+    setFilterMinPrice('');
+    setFilterMaxPrice('');
+    setFilterBedrooms(0);
+    setFilterType('all');
+    onClearFilters(); 
+  };
+
+  // --- Title Logic ---
+  let title = category;
+  const knownCities = ['Concepción', 'Chiguayante', 'San Pedro de la Paz', 'Talcahuano', 'Coronel', 'Penco', 'Los Ángeles'];
+  
+  if (knownCities.includes(category)) {
+    title = `Propiedades de lujo en ${category}`;
+  } else if (category === 'Bienes Raíces') {
+    title = 'Propiedades Exclusivas en Venta';
+  } else if (category === 'Premium Property') {
+    title = 'Colección Premium';
+  }
+
+  return (
+    <div className="min-h-screen bg-white pt-24 pb-20 font-sans">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        // Asumiendo que USD, EUR o CLP se pasan como el símbolo
-        return `${currency} ${priceValue}`;
-    };
+        {/* Breadcrumbs */}
+        <nav className="flex items-center text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-6">
+          <button onClick={onGoHome} className="hover:text-leroy-black transition-colors">Inicio</button>
+          <span className="mx-2">/</span>
+          <span className="text-leroy-black">{category}</span>
+        </nav>
 
-    return (
-        <div className="pt-32 p-8 bg-white min-h-screen">
-            <div className="max-w-7xl mx-auto">
-                
-                {/* Botón de Navegación: CORRECCIÓN para el error TS6133 (prop declarada pero no usada) */}
-                <button 
-                    onClick={() => onNavigate('home')} 
-                    className="mb-8 text-sm text-black hover:text-gray-600 font-bold flex items-center transition duration-150"
-                >
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Volver a Inicio
-                </button>
-                
-                {/* Título y Filtros */}
-                <h1 className="text-4xl font-serif mb-2">{category || 'Todas las Propiedades'}</h1>
-                {searchFilters && (
-                    <p className="text-lg text-gray-500 mb-8">
-                        Resultados de búsqueda en: {searchFilters.location || 'cualquier lugar'}
-                    </p>
-                )}
-                
-                <div className="flex justify-between items-center mb-10 border-b pb-4">
-                    <p className="text-gray-700 font-semibold">{properties.length} Propiedad(es) encontrada(s)</p>
-                    {/* Aquí iría el componente de ordenamiento o más filtros */}
-                </div>
-
-                {/* Cuadrícula de Propiedades */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                    {properties.map((property) => (
-                        <div 
-                            key={property.id} 
-                            onClick={() => onPropertyClick(property)}
-                            className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition duration-300 transform hover:-translate-y-1"
-                        >
-                            {/* La URL de la imagen debe ser válida en tu sistema */}
-                            <img 
-                                src={property.imageUrl || 'placeholder.jpg'} 
-                                alt={property.title} 
-                                className="w-full h-48 object-cover"
-                            />
-                            <div className="p-5">
-                                <span className="text-xs font-semibold text-orange-600 uppercase tracking-wider">
-                                    {PropertyType[property.type as keyof typeof PropertyType] || property.type}
-                                </span>
-                                <h2 className="text-2xl font-bold text-gray-900 mt-1 mb-2 truncate">
-                                    {property.title}
-                                </h2>
-                                <p className="text-lg font-semibold text-gray-800 mb-3">
-                                    {formatPrice(property.price, property.currency)}
-                                </p>
-                                <div className="flex text-gray-600 text-sm space-x-4">
-                                    <span>🛌 {property.bedrooms}</span>
-                                    <span>🛁 {property.bathrooms}</span>
-                                    <span>📐 {property.area} m²</span>
-                                </div>
-                                <p className="text-sm text-gray-500 mt-2 truncate">{property.location}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                
-                {properties.length === 0 && (
-                    <div className="text-center py-20">
-                        <p className="text-2xl text-gray-500">No se encontraron propiedades que coincidan con los criterios.</p>
-                        <button 
-                            onClick={() => onNavigate('home')}
-                            className="mt-6 text-lg text-black hover:text-gray-700 underline font-semibold"
-                        >
-                            &larr; Iniciar una nueva búsqueda
-                        </button>
-                    </div>
-                )}
-                
-            </div>
+        {/* Header */}
+        <div className="mb-8 border-b border-gray-100 pb-8">
+            <h1 className="font-serif text-3xl md:text-5xl text-leroy-black mb-4">
+              {title}
+            </h1>
+            <p className="text-gray-500 font-light max-w-2xl text-sm md:text-base">
+               Explora nuestra selección curada de las propiedades más extraordinarias. 
+               {filteredProperties.length} resultados encontrados.
+            </p>
         </div>
-    );
+
+        {/* JamesEdition Style Filters Bar */}
+        <div className="sticky top-20 z-30 bg-white/95 backdrop-blur-sm border-y border-gray-100 py-4 mb-10 -mx-4 px-4 md:mx-0 md:px-0">
+           <div className="flex flex-wrap items-center gap-4 justify-between">
+              
+              {/* Filter Controls */}
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                 {/* Type Filter */}
+                 <div className="relative group">
+                    <select 
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-leroy-gold hover:border-gray-300 cursor-pointer min-w-[140px]"
+                    >
+                        <option value="all">Tipo: Todos</option>
+                        {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                 </div>
+
+                 {/* Bedrooms Filter */}
+                 <div className="relative group">
+                    <select 
+                        value={filterBedrooms}
+                        onChange={(e) => setFilterBedrooms(Number(e.target.value))}
+                        className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-2 px-4 pr-8 rounded text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-leroy-gold hover:border-gray-300 cursor-pointer min-w-[140px]"
+                    >
+                        <option value={0}>Dormitorios: Todos</option>
+                        <option value={1}>1+</option>
+                        <option value={2}>2+</option>
+                        <option value={3}>3+</option>
+                        <option value={4}>4+</option>
+                        <option value={5}>5+</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                 </div>
+
+                 {/* Price Filter Toggle (Simple logic for UI) */}
+                 <button 
+                   onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                   className={`border border-gray-200 py-2 px-4 rounded text-xs font-bold uppercase tracking-widest hover:border-leroy-gold transition-colors ${filterMinPrice || filterMaxPrice ? 'bg-gray-100 border-gray-300' : 'bg-gray-50'}`}
+                 >
+                   Precio {filterMinPrice || filterMaxPrice ? '(Activo)' : ''}
+                 </button>
+
+                 <button 
+                   onClick={handleClearLocalFilters}
+                   className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black underline decoration-gray-300 underline-offset-4 ml-2"
+                 >
+                   Limpiar
+                 </button>
+              </div>
+
+              {/* View/Sort Options (Visual mostly) */}
+              <div className="hidden md:flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400">
+                  <span>Ordenar por:</span>
+                  <select className="bg-transparent border-none p-0 text-leroy-black font-bold uppercase tracking-widest focus:ring-0 cursor-pointer">
+                      <option>Relevancia</option>
+                      <option>Precio: Menor a Mayor</option>
+                      <option>Precio: Mayor a Menor</option>
+                      <option>Más Recientes</option>
+                  </select>
+              </div>
+           </div>
+
+           {/* Expandable Price Filter Area */}
+           {isFiltersOpen && (
+             <div className="absolute top-full left-0 mt-2 bg-white border border-gray-200 shadow-xl p-6 rounded w-full md:w-80 z-50 animate-in slide-in-from-top-2">
+                <h3 className="text-xs font-bold uppercase tracking-widest mb-4">Rango de Precio (CLP)</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="text-[10px] text-gray-500 block mb-1">Mínimo</label>
+                        <input 
+                            type="number" 
+                            value={filterMinPrice}
+                            onChange={(e) => setFilterMinPrice(e.target.value)}
+                            className="w-full border-gray-200 bg-gray-50 p-2 rounded text-sm"
+                            placeholder="0"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] text-gray-500 block mb-1">Máximo</label>
+                        <input 
+                            type="number" 
+                            value={filterMaxPrice}
+                            onChange={(e) => setFilterMaxPrice(e.target.value)}
+                            className="w-full border-gray-200 bg-gray-50 p-2 rounded text-sm"
+                            placeholder="Sin límite"
+                        />
+                    </div>
+                    <button 
+                        onClick={() => setIsFiltersOpen(false)}
+                        className="w-full bg-leroy-black text-white py-2 rounded text-xs font-bold uppercase tracking-widest mt-2"
+                    >
+                        Aplicar
+                    </button>
+                </div>
+             </div>
+           )}
+        </div>
+
+        {/* Results Grid */}
+        {filteredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {filteredProperties.map(property => (
+              <PropertyCard
+                key={property.id}
+                property={property}
+                onClick={() => onPropertyClick(property)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-32 bg-gray-50 border border-dashed border-gray-200 rounded-lg">
+             <div className="bg-white p-4 rounded-full shadow-sm mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-gray-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+             </div>
+             <h3 className="font-serif text-xl text-gray-900 mb-2">Sin resultados</h3>
+             <p className="text-gray-500 text-sm mb-6">No encontramos propiedades que coincidan con tus filtros.</p>
+             <button 
+               onClick={handleClearLocalFilters}
+               className="text-leroy-gold font-bold uppercase text-xs tracking-widest border-b border-leroy-gold pb-1 hover:text-leroy-black hover:border-leroy-black transition-colors"
+             >
+               Ver todas las propiedades
+             </button>
+          </div>
+        )}
+
+        {/* Pagination / Footer Note */}
+        {filteredProperties.length > 0 && (
+            <div className="mt-20 flex flex-col items-center justify-center border-t border-gray-100 pt-10">
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-4">
+                    Mostrando {filteredProperties.length} de {properties.length} propiedades
+                </p>
+                {/* Visual Pagination */}
+                <div className="flex gap-2">
+                    <button className="w-8 h-8 flex items-center justify-center rounded-full bg-leroy-black text-white text-xs font-bold">1</button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors">2</button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors">3</button>
+                </div>
+            </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ListingView;
