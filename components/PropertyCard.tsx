@@ -4,7 +4,6 @@ import { Property } from '../types';
 interface PropertyCardProps {
   property: Property;
   onClick: () => void;
-  onGoHome?: () => void;
 }
 
 const UF_VALUE_CLP = 37800;
@@ -25,16 +24,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
   if (cleanCurrency === 'UF') {
     mainPriceDisplay = `UF ${price.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
     secondaryPriceDisplay = formatCLP(price * UF_VALUE_CLP);
+
   } else if (cleanCurrency === '$') {
     const clp = price * USD_VALUE_CLP;
     const uf = clp / UF_VALUE_CLP;
     mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
     secondaryPriceDisplay = formatCLP(clp);
+
   } else if (cleanCurrency === '€') {
     const clp = price * EUR_VALUE_CLP;
     const uf = clp / UF_VALUE_CLP;
     mainPriceDisplay = `UF ${uf.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
     secondaryPriceDisplay = formatCLP(clp);
+
   } else {
     mainPriceDisplay = `${cleanCurrency} ${price.toLocaleString()}`;
   }
@@ -59,6 +61,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
             <span className="text-xl font-bold text-black">
               {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
             </span>
+
             {secondaryPriceDisplay && property.price > 0 && (
               <span className="text-xs text-gray-500 font-medium mt-0.5">
                 {secondaryPriceDisplay}
@@ -75,9 +78,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick })
         </p>
 
         <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider pt-2 border-t border-gray-50 mt-1">
-             <span title="Habitaciones">{property.bedrooms} hab.</span>
+             <span>{property.bedrooms} hab.</span>
              <span className="w-px h-3 bg-gray-300"></span>
-             <span title="Área">{property.area} m²</span>
+             <span>{property.area} m²</span>
         </div>
       </div>
     </div>
