@@ -1,63 +1,73 @@
 // components/Hero.tsx
-import React from 'react';
+import React, { useState } from 'react';
+import { HeroSearchState } from '../types'; // Importar HeroSearchState
 
-// --- INTERFAZ CORREGIDA ---
-// Se define la interfaz para que TypeScript sepa que el componente Hero acepta 'onNavigate'.
 interface HeroProps {
-  onNavigate: (view: string, category?: string) => void;
+  // Propiedad clave para iniciar la búsqueda en App.tsx
+  onSearch: (filters: HeroSearchState) => void;
+  onNavigate: (view: string, category?: string) => void;
 }
-// --------------------------
 
-const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
-    
-    // Función de ejemplo que utiliza la prop onNavigate, 
-    // resolviendo así el error TS6133 ('onNavigate' is declared but its value is never read).
-    const handleNavigation = (view: string, category?: string) => {
-        // En un Hero típico, podrías navegar a la página de propiedades
-        // o a la vista de administración.
-        console.log(`Navegando a la vista: ${view}`);
-        onNavigate(view, category);
-    };
+const Hero: React.FC<HeroProps> = ({ onSearch, onNavigate }) => {
+    // --- Estado Local del Formulario ---
+    const [location, setLocation] = useState('');
+    const [bedrooms, setBedrooms] = useState('any'); // 'any' | '1+' | '2+' ...
+    const [priceRange, setPriceRange] = useState('any'); // 'any' | '0-50000000' ...
+    
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        const filters: HeroSearchState = {
+            location: location.trim(),
+            bedrooms: bedrooms,
+            priceRange: priceRange,
+        };
+        
+        // 1. Pasar los filtros a App.tsx
+        onSearch(filters);
+        
+        // 2. Navegar a la vista de resultados (que App.tsx manejará)
+        // Usamos 'properties' como vista principal. La categoría será 'Resultados de Búsqueda'
+        onNavigate('properties', 'Resultados de Búsqueda');
+    };
 
-    return (
-        <section className="relative bg-white pt-24 pb-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
-                <header className="text-center mb-12">
-                    <h1 className="font-serif text-5xl md:text-6xl font-light text-leroy-black leading-tight">
-                        Encuentra la Residencia de Tus Sueños
-                    </h1>
-                    <p className="mt-4 text-xl text-gray-600">
-                        Propiedades de lujo y exclusivas, seleccionadas con distinción.
-                    </p>
-                </header>
+    return (
+        <section className="relative bg-white pt-24 pb-32">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <header className="text-center mb-16">
+                    <h1 className="font-serif text-5xl md:text-6xl font-light text-leroy-black leading-tight">
+                        Encuentra la Residencia de Tus Sueños
+                    </h1>
+                    <p className="mt-4 text-xl text-gray-600">
+                        Propiedades de lujo y exclusivas, seleccionadas con distinción.
+                    </p>
+                </header>
 
-                {/* Ejemplo de uso de onNavigate en un botón */}
-                <div className="flex justify-center space-x-6">
-                    <button
-                        onClick={() => handleNavigation('properties')}
-                        className="bg-leroy-gold text-white px-8 py-3 rounded-lg text-lg font-bold uppercase tracking-wider hover:bg-yellow-600 transition-colors shadow-lg"
-                    >
-                        Explorar Propiedades
-                    </button>
-                    
-                    {/* Botón opcional para el acceso rápido al admin (uso de ejemplo) */}
-                    <button
-                        onClick={() => handleNavigation('admin')}
-                        className="border border-leroy-black text-leroy-black px-8 py-3 rounded-lg text-lg font-bold uppercase tracking-wider hover:bg-gray-100 transition-colors"
-                    >
-                        Acceso Admin
-                    </button>
-                </div>
-
-                {/* Puedes añadir más contenido, filtros o imágenes aquí */}
-                <div className="mt-16 rounded-xl overflow-hidden shadow-2xl">
-                   {/* Imagen de una propiedad de lujo para el Hero */}
-                   
-                </div>
-            </div>
-        </section>
-    );
-};
-
-export default Hero;
+                {/* --- FORMULARIO DE BÚSQUEDA (El Hero) --- */}
+                <form onSubmit={handleSearch} className="relative z-10 -mt-8 mx-auto max-w-4xl bg-white p-6 md:p-8 rounded-lg shadow-xl border border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        
+                        {/* 1. Ubicación */}
+                        <div>
+                            <label htmlFor="location" className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-1">Ubicación</label>
+                            <input
+                                id="location"
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder="Ciudad, Comuna o Barrio"
+                                className="w-full border-gray-300 p-3 text-sm focus:border-leroy-gold focus:ring-leroy-gold transition-colors"
+                            />
+                        </div>
+                        
+                        {/* 2. Dormitorios */}
+                        <div>
+                            <label htmlFor="bedrooms" className="block text-xs font-bold uppercase tracking-widest text-gray-700 mb-1">Dormitorios</label>
+                            <select
+                                id="bedrooms"
+                                value={bedrooms}
+                                onChange={(e) => setBedrooms(e.target.value)}
+                                className="w-full border-gray-300 p-3 text-sm focus:border-leroy-gold focus:ring-leroy-gold transition-colors appearance-none"
+                            >
+                                <option value="any">Cualquiera</option>
