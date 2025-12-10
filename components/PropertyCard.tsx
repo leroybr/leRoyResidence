@@ -4,7 +4,7 @@ import { Property } from '../types';
 interface PropertyCardProps {
   property: Property;
   onClick: () => void;
-  onGoHome?: () => void; 
+  onGoHome?: () => void;
 }
 
 const UF_VALUE_CLP = 37800;
@@ -15,14 +15,13 @@ const formatCLP = (amount: number) => {
   return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(amount);
 };
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, onGoHome }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick }) => {
   let mainPriceDisplay = '';
   let secondaryPriceDisplay = '';
   
   const cleanCurrency = property.currency.trim();
   const price = property.price;
 
-  // --- Lógica de Conversión de Precios ---
   if (cleanCurrency === 'UF') {
     mainPriceDisplay = `UF ${price.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
     secondaryPriceDisplay = formatCLP(price * UF_VALUE_CLP);
@@ -40,10 +39,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, o
     mainPriceDisplay = `${cleanCurrency} ${price.toLocaleString()}`;
   }
 
-  // --- JSX de la Tarjeta ---
   return (
     <div onClick={onClick} className="group cursor-pointer flex flex-col h-full">
-      {/* Increased height to h-80 to make image larger and vertical dominance */}
       <div className="relative overflow-hidden w-full h-80 bg-gray-100 mb-3">
         <img 
           src={property.imageUrl} 
@@ -58,7 +55,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, o
       </div>
 
       <div className="flex flex-col text-left">
-        {/* Price Section moved to top */}
         <div className="flex flex-col w-full items-baseline mb-2">
             <span className="text-xl font-bold text-black">
               {property.price === 0 ? 'Precio a consultar' : mainPriceDisplay}
@@ -70,17 +66,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, o
             )}
         </div>
 
-        {/* Title */}
         <h3 className="font-serif text-lg text-black line-clamp-2 mb-1 group-hover:underline decoration-1 underline-offset-4 leading-tight">
           {property.title}
         </h3>
 
-        {/* Location */}
         <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-2">
           {property.location}
         </p>
 
-        {/* Specs */}
         <div className="flex items-center space-x-4 text-gray-400 text-[10px] uppercase font-bold tracking-wider pt-2 border-t border-gray-50 mt-1">
              <span title="Habitaciones">{property.bedrooms} hab.</span>
              <span className="w-px h-3 bg-gray-300"></span>
