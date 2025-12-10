@@ -3,7 +3,7 @@ import { Property, PropertyType } from '../types';
 import { COMMUNES } from '../constants';
 
 // 🚨 1. Contraseña de Administrador (CÁMBIALA INMEDIATAMENTE)
-const ADMIN_PASSWORD = 'leroyadmin2026'; 
+const ADMIN_PASSWORD = C4s4sL3r0y!2026'; 
 
 interface AdminViewProps {
   onAddProperty: (property: Property) => void;
