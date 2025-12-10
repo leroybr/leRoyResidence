@@ -1,4 +1,4 @@
-// App.tsx
+// App.tsx (CORREGIDO)
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
@@ -101,6 +101,11 @@ const App: React.FC = () => {
     } else {
       handleNavigate('listing', 'Resultados de Búsqueda');
     }
+  };
+    
+  const handleClearFilters = () => {
+    setSearchFilters(null);
+    // Opcional: Recargar la vista de listado con la categoría actual, o ir a home si es necesario.
   };
 
   // --- Handlers de Administración (CRUD) - PERSISTENTES ---
@@ -235,7 +240,8 @@ const App: React.FC = () => {
       case 'home':
         return (
           <>
-            <Hero onSearch={handleHeroSearch} onNavigate={handleNavigate} />
+            {/* 1. CORRECCIÓN PRINCIPAL: Eliminado onNavigate para resolver TS2322 */}
+            <Hero onSearch={handleHeroSearch} />
             <div className="bg-white py-12">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-serif text-leroy-black mb-8 text-center">Propiedades Destacadas</h2>
@@ -266,7 +272,11 @@ const App: React.FC = () => {
             category={selectedCategory}
             searchFilters={searchFilters}
             onPropertyClick={handlePropertyClick} 
-            onNavigate={handleNavigate} // <--- ¡CORRECCIÓN FINAL APLICADA! Pasa la prop faltante.
+            onNavigate={handleNavigate}
+             {/* 2. CORRECCIÓN ADICIONAL: Se añaden las props onGoHome y onClearFilters 
+                 que ListingView probablemente requiere para su UI. */}
+             onGoHome={() => handleNavigate('home')} 
+             onClearFilters={handleClearFilters}
           />
         );
 
@@ -280,7 +290,10 @@ const App: React.FC = () => {
         );
 
       case 'showroom':
-        return <ShowroomView onNavigate={handleNavigate} />;
+        return (
+             {/* 3. CORRECCIÓN ADICIONAL: Se pasa la función onGoHome, más específica que handleNavigate */}
+             <ShowroomView onGoHome={() => handleNavigate('home')} />
+        );
 
       case 'admin':
         return (
