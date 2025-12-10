@@ -6,94 +6,98 @@ import { COMMUNES } from '../constants';
 const ADMIN_PASSWORD = 'leroyadmin2026'; 
 
 interface AdminViewProps {
-  onAddProperty: (property: Property) => void;
-  onCancel: () => void;
+  onAddProperty: (property: Property) => void;
+  onCancel: () => void;
 }
 
 const COMMON_AMENITIES = [
-  'Seguridad 24/7', 'Piscina Privada', 'Piscina Temperada', 'Quincho / BBQ', 
-  'Jardines', 'Estacionamiento', 'Vista Panorámica', 'Calefacción Central', 
-  'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
+  'Seguridad 24/7', 'Piscina Privada', 'Piscina Temperada', 'Quincho / BBQ', 
+  'Jardines', 'Estacionamiento', 'Vista Panorámica', 'Calefacción Central', 
+  'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
 ];
 
 const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
   
-  // 2. Estados de Autenticación
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [error, setError] = useState('');
+  // 2. Estados de Autenticación
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [error, setError] = useState('');
 
-  // Lógica para el Login
-  const handleLogin = () => {
-    if (passwordInput === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      setError('');
-      setPasswordInput(''); // Limpiar la contraseña
-    } else {
-      setError('Contraseña incorrecta. Acceso denegado.');
-      setPasswordInput('');
-    }
-  };
+  // Lógica para el Login
+  const handleLogin = () => {
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setError('');
+      setPasswordInput(''); // Limpiar la contraseña
+    } else {
+      setError('Contraseña incorrecta. Acceso denegado.');
+      setPasswordInput('');
+    }
+  };
   
-  // El resto de tus estados de datos (title, location, price, etc.) se mantienen igual
-  const [title, setTitle] = useState('');
-  const [subtitle, setSubtitle] = useState('');
-  const [location, setLocation] = useState(COMMUNES[0]);
-  const [price, setPrice] = useState<number>(0);
-  const [currency, setCurrency] = useState('UF'); 
-  const [type, setType] = useState<PropertyType>(PropertyType.VILLA);
-  const [bedrooms, setBedrooms] = useState(1);
-  const [bathrooms, setBathrooms] = useState(1);
-  const [area, setArea] = useState(0);
-  const [imageUrl, setImageUrl] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [isPremium, setIsPremium] = useState(false); 
+  // El resto de tus estados de datos (title, location, price, etc.)
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [location, setLocation] = useState(COMMUNES[0]);
+  const [price, setPrice] = useState<number>(0);
+  const [currency, setCurrency] = useState('UF'); 
+  const [type, setType] = useState<PropertyType>(PropertyType.VILLA);
+  const [bedrooms, setBedrooms] = useState(1);
+  const [bathrooms, setBathrooms] = useState(1);
+  const [area, setArea] = useState(0);
+  const [imageUrl, setImageUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [isPremium, setIsPremium] = useState(false); 
+  
+  // Estado para controlar la publicación. (Por defecto, no publicada)
+  const [isPublished, setIsPublished] = useState(false); 
 
-  // Private Data State
-  const [ownerName, setOwnerName] = useState('');
-  const [ownerPhone, setOwnerPhone] = useState('');
-  const [legalDescription, setLegalDescription] = useState('');
-  const [privateNotes, setPrivateNotes] = useState('');
+  // Private Data State
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerPhone, setOwnerPhone] = useState('');
+  const [legalDescription, setLegalDescription] = useState('');
+  const [privateNotes, setPrivateNotes] = useState('');
 
-  const toggleAmenity = (amenity: string) => {
-    if (selectedAmenities.includes(amenity)) {
-      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
-    } else {
-      setSelectedAmenities([...selectedAmenities, amenity]);
-    }
-  };
+  const toggleAmenity = (amenity: string) => {
+    if (selectedAmenities.includes(amenity)) {
+      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
+    } else {
+      setSelectedAmenities([...selectedAmenities, amenity]);
+    }
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
       // Asegurar que solo se envía si está autenticado (aunque el botón estaría oculto)
       if (!isAuthenticated) return; 
 
-    const newProperty: Property = {
-      id: `custom-${Date.now()}`,
-      title,
-      subtitle: subtitle || title, 
-      location: `${location}, Chile`,
-      price,
-      currency,
-      type,
-      bedrooms,
-      bathrooms,
-      area,
-      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
-      description,
-      amenities: selectedAmenities,
-      isPremium, 
-      privateData: {
-        ownerName,
-        ownerPhone,
-        legalDescription,
-        privateNotes
-      }
-    };
+    const newProperty: Property = {
+      id: `custom-${Date.now()}`,
+      title,
+      subtitle: subtitle || title, 
+      location: `${location}, Chile`,
+      price,
+      currency,
+      type,
+      bedrooms,
+      bathrooms,
+      area,
+      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
+      description,
+      amenities: selectedAmenities,
+      isPremium, 
+      isPublished, 
+      privateData: {
+        ownerName,
+        ownerPhone,
+        legalDescription,
+        privateNotes
+      }
+    };
 
-    onAddProperty(newProperty);
-  };
+    onAddProperty(newProperty);
+  };
 
 
   // 3. Renderizado del Login
@@ -137,37 +141,53 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
     );
   }
 
-  // 4. Renderizado del Formulario (Solo si isAuthenticated es TRUE)
-  return (
-    <div className="pt-32 pb-20 min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-serif text-3xl text-leroy-black">Nueva Ficha de Propiedad</h1>
-          <button onClick={onCancel} className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black">
-            Cerrar Sesión / Cancelar
-          </button>
-        </div>
+  // 4. Renderizado del Formulario (Solo si isAuthenticated es TRUE)
+  return (
+    <div className="pt-32 pb-20 min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="font-serif text-3xl text-leroy-black">Nueva Ficha de Propiedad</h1>
+          <button onClick={onCancel} className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black">
+            Cerrar Sesión / Cancelar
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-            {/* ... Todo el código de tu formulario original va aquí abajo ... */}
-          
-          {/* Public Data Section */}
-          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
-                {/* ... (Todo el contenido del Formulario Público) ... */}
+        <form onSubmit={handleSubmit} className="space-y-8">
+            
+          {/* Public Data Section */}
+          <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+            
                 <div className="flex justify-between items-center border-b pb-2 mb-6">
                     <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold">
                     Datos Públicos (Visible en Web)
                     </h2>
+                    
+                    {/* Toggle de Publicación */}
+                    <label className="flex items-center space-x-4 cursor-pointer select-none">
+                        <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${isPublished ? 'text-green-600' : 'text-gray-500'}`}>
+                            {isPublished ? 'PUBLICADA (EN VIVO)' : 'BORRADOR (OCULTA)'}
+                        </span>
+                        <div className="relative">
+                            <input 
+                                type="checkbox" 
+                                checked={isPublished} 
+                                onChange={(e) => setIsPublished(e.target.checked)} 
+                                className="sr-only peer" 
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </div>
+                    </label>
+
                     {/* Premium Toggle */}
                     <label className="flex items-center space-x-3 cursor-pointer select-none">
                         <span className="text-xs font-bold uppercase tracking-widest text-leroy-black">Clasificación Premium</span>
                         <div className="relative">
-                            <input 
-                                type="checkbox" 
-                                checked={isPremium} 
-                                onChange={(e) => setIsPremium(e.target.checked)} 
-                                className="sr-only peer" 
+                            <input 
+                                type="checkbox" 
+                                checked={isPremium} 
+                                onChange={(e) => setIsPremium(e.target.checked)} 
+                                className="sr-only peer" 
                             />
                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-leroy-gold"></div>
                         </div>
@@ -245,11 +265,11 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                             {COMMON_AMENITIES.map(amenity => (
                                 <label key={amenity} className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
-                                    <input 
-                                    type="checkbox" 
+                                    <input 
+                                    type="checkbox" 
                                     checked={selectedAmenities.includes(amenity)}
                                     onChange={() => toggleAmenity(amenity)}
-                                    className="rounded text-leroy-black focus:ring-0" 
+                                    className="rounded text-leroy-black focus:ring-0" 
                                     />
                                     <span>{amenity}</span>
                                 </label>
@@ -257,47 +277,47 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel }) => {
                         </div>
                     </div>
                 </div>
-          </div>
+          </div>
 
-          {/* Private Data Section */}
-          <div className="bg-red-50 p-8 rounded-lg shadow-sm border border-red-100 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-red-100 px-3 py-1 rounded-bl-lg text-[10px] font-bold text-red-800 uppercase tracking-widest">
-              Confidencial
-            </div>
-            <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-red-800 mb-6 border-b border-red-200 pb-2">
-              Datos Privados (Uso Interno)
-            </h2>
+          {/* Private Data Section */}
+          <div className="bg-red-50 p-8 rounded-lg shadow-sm border border-red-100 relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-red-100 px-3 py-1 rounded-bl-lg text-[10px] font-bold text-red-800 uppercase tracking-widest">
+              Confidencial
+            </div>
+            <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-red-800 mb-6 border-b border-red-200 pb-2">
+              Datos Privados (Uso Interno)
+            </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Nombre Propietario</label>
-                <input type="text" value={ownerName} onChange={e => setOwnerName(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Teléfono / Contacto</label>
-                <input type="text" value={ownerPhone} onChange={e => setOwnerPhone(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Datos Legales (Rol, Inscripción)</label>
-                <input type="text" value={legalDescription} onChange={e => setLegalDescription(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
-              </div>
-              <div className="col-span-2">
-                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Notas Internas</label>
-                <textarea rows={3} value={privateNotes} onChange={e => setPrivateNotes(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" placeholder="Acuerdos de comisión, disponibilidad de llaves, etc."></textarea>
-              </div>
-            </div>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Nombre Propietario</label>
+                <input type="text" value={ownerName} onChange={e => setOwnerName(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Teléfono / Contacto</label>
+                <input type="text" value={ownerPhone} onChange={e => setOwnerPhone(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Datos Legales (Rol, Inscripción)</label>
+                <input type="text" value={legalDescription} onChange={e => setLegalDescription(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Notas Internas</label>
+                <textarea rows={3} value={privateNotes} onChange={e => setPrivateNotes(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" placeholder="Acuerdos de comisión, disponibilidad de llaves, etc."></textarea>
+              </div>
+            </div>
+          </div>
 
-          <div className="flex justify-end pt-4">
-             <button type="submit" className="bg-leroy-black text-white px-10 py-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg">
-               Guardar y Publicar
-             </button>
-          </div>
+          <div className="flex justify-end pt-4">
+               <button type="submit" className="bg-leroy-black text-white px-10 py-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg">
+                 {isPublished ? 'Guardar y PUBLICAR' : 'Guardar como BORRADOR'}
+               </button>
+          </div>
 
-        </form>
-      </div>
-    </div>
-  );
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default AdminView;
