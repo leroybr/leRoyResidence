@@ -30,6 +30,8 @@ export interface Property {
   amenities?: string[]; // List of features
   isPremium?: boolean; // New: Manual flag for Premium classification
   privateData?: PrivateData; // Optional field for admin use only
+  // ✅ CAMBIO CLAVE: Agregado el campo para el control de publicación
+  isPublished: boolean; 
 }
 
 export interface SearchFilters {
