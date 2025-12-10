@@ -7,26 +7,24 @@ import ListingView from './components/ListingView';
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
 import ShowroomView from './components/ShowroomView';
-// Importamos MOCK_PROPERTIES solo como fallback, no como estado inicial
-// import { MOCK_PROPERTIES } from './constants'; // Ya no se usa como estado inicial
 import { Property, HeroSearchState } from './types';
 
 const UF_VALUE_CLP = 37800; // Valor aproximado de la UF en pesos chilenos
 
 const App: React.FC = () => {
-  // [CAMBIO CLAVE] Inicializamos el estado de propiedades como array vacío
-  const [properties, setProperties] = useState<Property[]>([]); 
-  const [isLoading, setIsLoading] = useState(true); // Nuevo estado para la carga inicial
+  // [ESTADOS] Inicializamos el estado de propiedades como array vacío
+  const [properties, setProperties] = useState<Property[]>([]); 
+  const [isLoading, setIsLoading] = useState(true); 
   const [currentView, setCurrentView] = useState('home');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
 
-  // --- NUEVA LÓGICA: Carga de Propiedades desde la API ---
+  // --- LÓGICA: Carga de Propiedades desde la API ---
   const fetchProperties = useCallback(async () => {
     setIsLoading(true);
     try {
-      // [CAMBIO CLAVE] Llamada al endpoint API para obtener todas las propiedades guardadas
+      // Llamada al endpoint API para obtener todas las propiedades guardadas
       const response = await fetch('/api/properties');
       if (!response.ok) {
         throw new Error('Error al cargar las propiedades del servidor');
@@ -35,9 +33,6 @@ const App: React.FC = () => {
       setProperties(data);
     } catch (error) {
       console.error("Fallo al obtener propiedades:", error);
-      // Opcional: Usar MOCK_PROPERTIES si la API falla críticamente
-      // import { MOCK_PROPERTIES } from './constants';
-      // setProperties(MOCK_PROPERTIES); 
     } finally {
       setIsLoading(false);
     }
@@ -45,12 +40,12 @@ const App: React.FC = () => {
 
   // --- Lógica de URL/Inicialización ---
   useEffect(() => {
-    fetchProperties(); // [CAMBIO CLAVE] Cargar propiedades al inicio
-    
+    fetchProperties(); // Cargar propiedades al inicio
+    
     const params = new URLSearchParams(window.location.search);
     const page = params.get('page');
     const category = params.get('category');
-    
+    
     if (page === 'listing' && category) {
       setCurrentView('listing');
       setSelectedCategory(category);
@@ -59,9 +54,9 @@ const App: React.FC = () => {
     } else if (page === 'admin') {
       setCurrentView('admin');
     }
-  }, [fetchProperties]); // Dependencia para asegurar que solo se ejecuta una vez
+  }, [fetchProperties]); 
 
-  // --- Lógica de Título de Página (sin cambios) ---
+  // --- Lógica de Título de Página ---
   useEffect(() => {
     let title = 'LeRoy Residence | Corretaje de Propiedades';
 
@@ -78,7 +73,7 @@ const App: React.FC = () => {
     document.title = title;
   }, [currentView, selectedCategory, selectedProperty]);
 
-  // --- Handlers de Navegación y Búsqueda (sin cambios) ---
+  // --- Handlers de Navegación y Búsqueda ---
   const handleNavigate = (view: string, category: string = '') => {
     setCurrentView(view);
     setSelectedCategory(category);
@@ -94,7 +89,7 @@ const App: React.FC = () => {
 
   const handleHeroSearch = (filters: HeroSearchState) => {
     setSearchFilters(filters);
-    
+    
     if (filters.location && filters.bedrooms === 'any' && filters.priceRange === 'any') {
         handleNavigate('listing', filters.location);
     } else {
@@ -102,9 +97,9 @@ const App: React.FC = () => {
     }
   };
 
-  // --- Handlers de Administración (CRUD) - AHORA PERSISTENTES ---
+  // --- Handlers de Administración (CRUD) - PERSISTENTES ---
   const handleAddProperty = async (newProperty: Property) => {
-    // [CAMBIO CLAVE] Enviar la nueva propiedad a la API usando POST
+    // Enviar la nueva propiedad a la API usando POST
     try {
       const response = await fetch('/api/properties', {
         method: 'POST',
@@ -113,7 +108,7 @@ const App: React.FC = () => {
       });
 
       if (response.ok) {
-        await fetchProperties(); // Recargar la lista después de la adición
+        await fetchProperties(); // Recargar la lista
         setCurrentView('admin');
       } else {
         console.error('Error al agregar propiedad:', await response.text());
@@ -126,7 +121,7 @@ const App: React.FC = () => {
   };
 
   const handleUpdateProperty = async (updatedProperty: Property) => {
-    // [CAMBIO CLAVE] Enviar la propiedad actualizada a la API usando PUT
+    // Enviar la propiedad actualizada a la API usando PUT
     try {
       const response = await fetch(`/api/properties?id=${updatedProperty.id}`, {
         method: 'PUT',
@@ -135,7 +130,7 @@ const App: React.FC = () => {
       });
 
       if (response.ok) {
-        await fetchProperties(); // Recargar la lista después de la actualización
+        await fetchProperties(); // Recargar la lista
         setCurrentView('admin');
       } else {
         console.error('Error al actualizar propiedad:', await response.text());
@@ -148,7 +143,7 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProperty = async (propertyId: string) => {
-    // [CAMBIO CLAVE] Enviar solicitud de eliminación a la API usando DELETE
+    // Enviar solicitud de eliminación a la API usando DELETE
     if (!window.confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) return;
 
     try {
@@ -157,7 +152,7 @@ const App: React.FC = () => {
       });
 
       if (response.ok) {
-        await fetchProperties(); // Recargar la lista después de la eliminación
+        await fetchProperties(); // Recargar la lista
         setCurrentView('admin');
       } else {
         console.error('Error al eliminar propiedad:', await response.text());
@@ -170,7 +165,7 @@ const App: React.FC = () => {
   };
   // --- Fin Handlers de Administración (CRUD) ---
 
-  // --- Lógica de Filtrado de Propiedades (sin cambios, usa el nuevo estado 'properties') ---
+  // --- Lógica de Filtrado de Propiedades ---
   const getFilteredProperties = () => {
     let filtered = properties;
 
@@ -179,7 +174,7 @@ const App: React.FC = () => {
         filtered = filtered.filter(p => p.isPublished);
     }
 
-    // ... (resto de la lógica de filtrado es la misma) ...
+    // ... (resto de la lógica de filtrado por categoría y filtros de búsqueda) ...
     if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') {
       if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
         // No hay filtro de categoría, solo se usan los filtros de búsqueda si existen
@@ -206,13 +201,13 @@ const App: React.FC = () => {
         filtered = filtered.filter(p => {
             let priceInCLP = 0;
             const currency = p.currency.trim();
-            
-            // Asumimos un tipo de cambio fijo para el filtro (solo para el mock)
+            
+            // Convertimos el precio a CLP para el filtro
             if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
             else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950;
             else if (currency === '€') priceInCLP = p.price * 1020;
-            else priceInCLP = p.price; 
-            
+            else priceInCLP = p.price; 
+            
             return priceInCLP >= min && priceInCLP <= max;
         });
       }
@@ -227,9 +222,9 @@ const App: React.FC = () => {
     if (isLoading && currentView !== 'admin') {
       return <p className="text-center mt-32 text-xl text-gray-700">Cargando propiedades...</p>;
     }
-    
+    
     const filteredProperties = getFilteredProperties();
-    
+    
     switch (currentView) {
       case 'home':
         return (
@@ -243,9 +238,9 @@ const App: React.FC = () => {
                     .filter(p => p.isPremium && p.isPublished)
                     .slice(0, 3)
                     .map(property => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property} 
+                      <PropertyCard 
+                        key={property.id} 
+                        property={property} 
                         onClick={() => handlePropertyClick(property)}
                       />
                     ))}
@@ -260,20 +255,20 @@ const App: React.FC = () => {
 
       case 'listing':
         return (
-          <ListingView 
-            properties={filteredProperties} 
+          <ListingView 
+            properties={filteredProperties} 
             category={selectedCategory}
             searchFilters={searchFilters}
-            onPropertyClick={handlePropertyClick} 
+            onPropertyClick={handlePropertyClick} 
           />
         );
 
       case 'detail':
         if (!selectedProperty) return <p className="text-center mt-20">Propiedad no encontrada.</p>;
         return (
-          <PropertyDetailView 
-            property={selectedProperty} 
-            onNavigate={handleNavigate} 
+          <PropertyDetailView 
+            property={selectedProperty} 
+            onNavigate={handleNavigate} 
           />
         );
 
@@ -282,12 +277,12 @@ const App: React.FC = () => {
 
       case 'admin':
         return (
-          <AdminView 
+          <AdminView 
             properties={properties} // Pasar todas las propiedades, incluyendo borradores
-            onAddProperty={handleAddProperty} 
-            onUpdateProperty={handleUpdateProperty} 
-            onDeleteProperty={handleDeleteProperty} 
-            onCancel={() => handleNavigate('home')} 
+            onAddProperty={handleAddProperty} 
+            onUpdateProperty={handleUpdateProperty} 
+            onDeleteProperty={handleDeleteProperty} 
+            onCancel={() => handleNavigate('home')} 
           />
         );
 
@@ -299,6 +294,7 @@ const App: React.FC = () => {
             <button onClick={() => handleNavigate('home')} className="mt-4 text-leroy-black hover:underline">
               Volver al Inicio
             </button>
+          </div> // 👈 CORRECCIÓN: Etiqueta de cierre de div añadida
         );
     }
   };
