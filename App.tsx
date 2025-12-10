@@ -3,7 +3,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 import { PropertyCard } from './components/PropertyCard';
-import { ListingView } from './components/ListingView'; // Importación corregida
+import ListingView from './components/ListingView'; 
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
 import ShowroomView from './components/ShowroomView';
@@ -19,7 +19,6 @@ const App: React.FC = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
 
-  // Restore simple query param reading on mount (for external links/sitemap compatibility)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const page = params.get('page');
@@ -35,7 +34,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Dynamic Title Management
   useEffect(() => {
     let title = 'LeRoy Residence | Corretaje de Propiedades';
 
@@ -68,12 +66,9 @@ const App: React.FC = () => {
   const handleHeroSearch = (filters: HeroSearchState) => {
     setSearchFilters(filters);
     
-    // Logic to switch to listing view
     if (filters.location && filters.bedrooms === 'any' && filters.priceRange === 'any') {
-       // Direct location navigation
        handleNavigate('listing', filters.location);
     } else {
-      // Complex search
       handleNavigate('listing', 'Resultados de Búsqueda');
     }
   };
@@ -84,23 +79,18 @@ const App: React.FC = () => {
     handleNavigate('listing', 'Bienes Raíces');
   };
 
-  // Filter Logic
   const getFilteredProperties = () => {
     let filtered = properties;
 
-    // 1. Filter by Category / Location
     if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') {
       if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
-        // Show all for now, or add specific logic
       } else if (selectedCategory === 'Premium Property') {
           filtered = filtered.filter(p => p.isPremium);
       } else {
-        // Assume category is a location name
         filtered = filtered.filter(p => p.location.includes(selectedCategory));
       }
     }
 
-    // 2. Filter by Search State
     if (searchFilters) {
       if (searchFilters.location) {
         filtered = filtered.filter(p => p.location.includes(searchFilters.location));
@@ -117,7 +107,7 @@ const App: React.FC = () => {
         filtered = filtered.filter(p => {
             let priceInCLP = 0;
             const currency = p.currency.trim();
-            // Normalize to CLP for filtering
+            
             if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
             else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950; 
             else if (currency === '€') priceInCLP = p.price * 1020; 
@@ -138,7 +128,6 @@ const App: React.FC = () => {
           <>
             <Hero onSearch={handleHeroSearch} isSearching={false} />
             
-            {/* Home Sections */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-100 pb-6">
                   <div>
@@ -157,14 +146,12 @@ const App: React.FC = () => {
                       <PropertyCard 
                         property={property} 
                         onClick={() => handlePropertyClick(property)} 
-                        // onGoHome fue removido para evitar TS2322 en App.tsx
                       />
                     </div>
                   ))}
                 </div>
             </div>
 
-            {/* Sellers Section */}
             <section className="bg-leroy-black text-white py-24 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-64 h-64 bg-leroy-gold opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
                <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
@@ -177,7 +164,6 @@ const App: React.FC = () => {
                </div>
             </section>
 
-            {/* Trust Section */}
             <section className="py-20 bg-white">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="text-center mb-16">
@@ -201,7 +187,6 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Lifestyle Section */}
             <section className="bg-gray-50 py-20">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -228,7 +213,6 @@ const App: React.FC = () => {
             onPropertyClick={handlePropertyClick}
             onGoHome={() => handleNavigate('home')}
             onClearFilters={() => handleNavigate('listing', 'Bienes Raíces')}
-            // ✅ CORRECCIÓN: Se añade la prop 'onNavigate' con la función 'handleNavigate'.
             onNavigate={handleNavigate}
           />
         );
