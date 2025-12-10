@@ -1,3 +1,5 @@
+// App.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -11,11 +13,14 @@ import { Property, HeroSearchState } from './types';
 
 const UF_VALUE_CLP = 37800; // Valor aproximado de la UF en pesos chilenos
 
+// Definición de tipos de vista para mayor claridad en el estado
+type View = 'home' | 'listing' | 'detail' | 'showroom' | 'admin';
+
 const App: React.FC = () => {
   // [ESTADOS] Inicializamos el estado de propiedades como array vacío
   const [properties, setProperties] = useState<Property[]>([]); 
-  const [isLoading, setIsLoading] = useState(true); 
-  const [currentView, setCurrentView] = useState('home');
+  const [isLoading, setIsLoading] = useState(true); 
+  const [currentView, setCurrentView] = useState<View>('home'); // Tipado de View
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
@@ -54,7 +59,7 @@ const App: React.FC = () => {
     } else if (page === 'admin') {
       setCurrentView('admin');
     }
-  }, [fetchProperties]); 
+  }, [fetchProperties]); 
 
   // --- Lógica de Título de Página ---
   useEffect(() => {
@@ -74,8 +79,9 @@ const App: React.FC = () => {
   }, [currentView, selectedCategory, selectedProperty]);
 
   // --- Handlers de Navegación y Búsqueda ---
+  // El argumento 'view' se tipa como 'string' para compatibilidad con URLParams
   const handleNavigate = (view: string, category: string = '') => {
-    setCurrentView(view);
+    setCurrentView(view as View); // Conversión a View tipada
     setSelectedCategory(category);
     setSearchFilters(null);
     window.scrollTo(0, 0);
@@ -260,6 +266,7 @@ const App: React.FC = () => {
             category={selectedCategory}
             searchFilters={searchFilters}
             onPropertyClick={handlePropertyClick} 
+            onNavigate={handleNavigate} // <--- ¡CORRECCIÓN FINAL APLICADA! Pasa la prop faltante.
           />
         );
 
@@ -294,7 +301,7 @@ const App: React.FC = () => {
             <button onClick={() => handleNavigate('home')} className="mt-4 text-leroy-black hover:underline">
               Volver al Inicio
             </button>
-          </div> // 👈 CORRECCIÓN: Etiqueta de cierre de div añadida
+          </div>
         );
     }
   };
