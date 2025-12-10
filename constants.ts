@@ -27,7 +27,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Espectacular villa moderna con acceso directo a la playa y vistas panorámicas al Mediterráneo. Acabados de mármol italiano y domótica integral.',
     amenities: ['Piscina Privada', 'Vista al Mar', 'Seguridad 24/7', 'Domótica', 'Gimnasio'],
     isPremium: true,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: '5',
@@ -44,7 +44,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Obra maestra de la arquitectura con vistas al Arco y al Océano Pacífico. Espacios diseñados para el entretenimiento a gran escala.',
     amenities: ['Piscina Infinita', 'Cine en Casa', 'Spa', 'Cava de Vinos', 'Helipuerto'],
     isPremium: true,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: '7',
@@ -61,7 +61,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Santuario privado rodeado de naturaleza exuberante. Diseño biomimético y privacidad absoluta.',
     amenities: ['Paneles Solares', 'Cenote Privado', 'Yoga Deck', 'Seguridad 24/7'],
     isPremium: true,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
 
   // --- Propiedades Octava Región (Nuevas) ---
@@ -80,7 +80,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Exclusiva propiedad en el sector más consolidado de Chiguayante con amplios jardines formados, piscina temperada y quincho independiente.',
     amenities: ['Calefacción Central', 'Piscina Temperada', 'Quincho', 'Estacionamiento Techado', 'Jardín Formado'],
     isPremium: false,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-2',
@@ -97,7 +97,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Penthouse dúplex en Condominio Andalué. Terrazas amplias, acabados de lujo y acceso controlado.',
     amenities: ['Vista Panorámica', 'Jacuzzi', 'Conserjería 24/7', 'Gimnasio', '2 Estacionamientos'],
     isPremium: false,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-3',
@@ -114,7 +114,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Finca histórica a minutos del centro, ideal para proyecto hotelero o residencia de lujo. Parque de 5 hectáreas con árboles centenarios.',
     amenities: ['Parque Privado', 'Casa de Huéspedes', 'Caballerizas', 'Pozo Profundo'],
     isPremium: true,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-4',
@@ -131,7 +131,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Ubicación privilegiada frente al pulmón verde de la ciudad. Cocina integrada equipada y ventanas termopanel.',
     amenities: ['Ubicación Céntrica', 'Termopanel', 'Cocina Equipada', 'Bodega'],
     isPremium: false,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-5',
@@ -148,7 +148,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Arquitectura de vanguardia con espacios de doble altura y luminosidad excepcional. Emplazada en el exclusivo sector de El Venado.',
     amenities: ['Doble Altura', 'Quincho Integrado', 'Piscina', 'Riego Automático', 'Seguridad'],
     isPremium: true,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-6',
@@ -165,7 +165,7 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Tranquilidad absoluta en sector Lirquén, rodeado de bosque nativo y con vista despejada a la bahía.',
     amenities: ['Vista al Mar', 'Bosque Nativo', 'Agua de Vertiente', 'Terraza Panorámica'],
     isPremium: false,
-    isPublished: true // ✅ AGREGADO: Publicada
+    isPublished: true
   },
   {
     id: 'cl-7',
@@ -182,6 +182,6 @@ export const MOCK_PROPERTIES: Property[] = [
     description: 'Vista despejada a la bahía, sector Brisas del Sol, cercano a Casino y servicios.',
     amenities: ['Vista a la Bahía', 'Cercano a Casino', 'Estacionamiento', 'Balcón'],
     isPremium: false,
-    isPublished: false // 🛑 CAMBIO CLAVE: NO PUBLICADA (invisible al público)
+    isPublished: false // Oculta para el público
   }
 ];
