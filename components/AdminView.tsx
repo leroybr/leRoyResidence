@@ -1,643 +1,394 @@
-// components/AdminView.tsx
+import React, { useState } from 'react';
+import { Property, PropertyType } from '../types';
+import { COMMUNES } from '../constants';
 
-import React, { useState, useEffect, useCallback } from 'react';
-// Si usas estos archivos reales, descomenta las siguientes líneas:
-// import { Property, PropertyType, PrivateData } from '../types'; 
-// import { COMMUNES } from '../constants';
-
-// --- SIMULACIÓN DE TYPES Y CONSTANTES (Reemplazar con tus archivos reales) ---
-// La simulación se usa para que el componente sea autocontenido y funcione sin errores de importación directa.
-enum PropertyType {
-    VILLA = 'Villa',
-    APARTMENT = 'Apartamento',
-    HOUSE = 'Casa',
-    LAND = 'Terreno',
-    COMMERCIAL = 'Comercial'
-}
-
-interface PrivateData {
-    ownerName: string;
-    ownerPhone: string;
-    legalDescription: string;
-    privateNotes: string;
-}
-
-interface Property {
-    id: string;
-    title: string;
-    subtitle: string;
-    location: string;
-    price: number;
-    currency: 'UF' | '$' | 'USD' | '€';
-    type: PropertyType;
-    bedrooms: number;
-    bathrooms: number;
-    area: number;
-    imageUrl: string;
-    description: string;
-    amenities: string[];
-    isPremium: boolean;
-    isPublished: boolean;
-    privateData: PrivateData;
-}
-
-const COMMUNES = [
-    'Santiago', 'Las Condes', 'Providencia', 'Vitacura', 'Lo Barnechea',
-    'Concepción', 'Viña del Mar', 'Valparaíso', 'Puerto Varas'
-];
-// ---------------------------------------------------------------------
-
-const ADMIN_PASSWORD = 'C4s4sL3r0y!2026';
-
-// Interfaz de Propiedades de AdminView (CORREGIDA para evitar el error TS2322)
 interface AdminViewProps {
-    properties: Property[];
-    // Funciones CRUD asíncronas
-    onAddProperty: (property: Property) => Promise<void>; 
-    onUpdateProperty: (property: Property) => Promise<void>;
-    onDeleteProperty: (id: string) => Promise<void>; 
-    onCancel: () => void; // Para 'Volver al Inicio' / 'Cerrar Sesión'
-    // Se elimina onNavigate: (view: string, category?: string) => void;
+  onAddProperty: (property: Property) => void;
+  onUpdateProperty?: (property: Property) => void;
+  onCancel: () => void;
+  properties?: Property[]; // New prop for managing inventory
 }
 
 const COMMON_AMENITIES = [
-    'Seguridad 24/7', 'Piscina Privada', 'Piscina Temperada', 'Quincho / BBQ',
-    'Jardines', 'Estacionamiento', 'Vista Panorámica', 'Calefacción Central',
-    'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
+  'Seguridad 24/7', 'Piscina Privada', 'Piscina Temperada', 'Quincho / BBQ', 
+  'Jardines', 'Estacionamiento', 'Vista Panorámica', 'Calefacción Central', 
+  'Bodega', 'Gimnasio', 'Spa', 'Domótica', 'Cava de Vinos', 'Cine en Casa'
 ];
 
-const AdminView: React.FC<AdminViewProps> = ({ 
-    properties, 
-    onAddProperty, 
-    onUpdateProperty, 
-    onDeleteProperty, 
-    onCancel 
-}) => {
-    
-    // 1. Estados de Autenticación
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [passwordInput, setPasswordInput] = useState('');
-    const [error, setError] = useState('');
-    
-    // 2. Estados de Edición / Gestión
-    const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-    const [isNewProperty, setIsNewProperty] = useState(false); 
-    
-    // 3. Estados del Formulario (todos inicializados con valores controlados)
-    const [id, setId] = useState<string | null>(null); 
-    const [title, setTitle] = useState('');
-    const [subtitle, setSubtitle] = useState('');
-    const [location, setLocation] = useState(COMMUNES.length > 0 ? COMMUNES[0] : '');
-    const [priceInput, setPriceInput] = useState('0');
-    const [currency, setCurrency] = useState<'UF' | '$' | 'USD' | '€'>('UF'); 
-    const [type, setType] = useState<PropertyType>(PropertyType.VILLA);
-    const [bedroomsInput, setBedroomsInput] = useState('1');
-    const [bathroomsInput, setBathroomsInput] = useState('1');
-    const [areaInput, setAreaInput] = useState('0');
-    const [imageUrl, setImageUrl] = useState('');
-    const [description, setDescription] = useState('');
-    const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-    const [isPremium, setIsPremium] = useState(false); 
-    const [isPublished, setIsPublished] = useState(false); 
-    
-    // Private Data State
-    const [ownerName, setOwnerName] = useState('');
-    const [ownerPhone, setOwnerPhone] = useState('');
-    const [legalDescription, setLegalDescription] = useState('');
-    const [privateNotes, setPrivateNotes] = useState('');
-    
-    // Función para resetear todos los estados del formulario a vacío/default
-    const resetForm = useCallback(() => {
-        setEditingProperty(null);
-        setIsNewProperty(false);
-        setId(null);
-        setTitle('');
-        setSubtitle('');
-        setLocation(COMMUNES.length > 0 ? COMMUNES[0] : '');
-        setPriceInput('0');
-        setCurrency('UF');
-        setType(PropertyType.VILLA);
-        setBedroomsInput('1');
-        setBathroomsInput('1');
-        setAreaInput('0');
-        setImageUrl('');
-        setDescription('');
-        setSelectedAmenities([]);
-        setIsPremium(false);
-        setIsPublished(false);
-        setOwnerName('');
-        setOwnerPhone('');
-        setLegalDescription('');
-        setPrivateNotes('');
-    }, []);
-    
-    // useEffect: Precarga datos al entrar en modo edición
-    useEffect(() => {
-        if (editingProperty) {
-            setId(editingProperty.id);
-            setTitle(editingProperty.title);
-            setSubtitle(editingProperty.subtitle);
-            // Aseguramos que la ubicación sea solo la comuna (sin ', Chile')
-            const comm = editingProperty.location.split(',')[0].trim();
-            setLocation(COMMUNES.includes(comm) ? comm : COMMUNES[0]); // Fallback seguro
-            
-            // Usar .toString() para precargar los inputs numéricos como strings
-            setPriceInput(editingProperty.price.toString());
-            setCurrency(editingProperty.currency);
-            setType(editingProperty.type);
-            setBedroomsInput(editingProperty.bedrooms.toString());
-            setBathroomsInput(editingProperty.bathrooms.toString());
-            setAreaInput(editingProperty.area.toString());
-            
-            setImageUrl(editingProperty.imageUrl);
-            setDescription(editingProperty.description);
-            setSelectedAmenities(editingProperty.amenities);
-            setIsPremium(editingProperty.isPremium);
-            setIsPublished(editingProperty.isPublished);
-            
-            // Datos Privados
-            setOwnerName(editingProperty.privateData.ownerName);
-            setOwnerPhone(editingProperty.privateData.ownerPhone);
-            setLegalDescription(editingProperty.privateData.legalDescription);
-            setPrivateNotes(editingProperty.privateData.privateNotes);
-            
-            setIsNewProperty(false);
-        } else if (isNewProperty) {
-            // Si es propiedad nueva, el resetForm ya se encargó de inicializar
-        }
-    }, [editingProperty, isNewProperty, resetForm]);
-    
-    
-    const handleLogin = () => {
-        if (passwordInput === ADMIN_PASSWORD) {
-            setIsAuthenticated(true);
-            setError('');
-            setPasswordInput('');
-        } else {
-            setError('Contraseña incorrecta. Acceso denegado.');
-            setPasswordInput('');
-        }
-    };
-    
-    const toggleAmenity = (amenity: string) => {
-        setSelectedAmenities(prev => 
-            prev.includes(amenity)
-                ? prev.filter(a => a !== amenity)
-                : [...prev, amenity]
-        );
+const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properties = [], onUpdateProperty }) => {
+  // --- Auth State ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  
+  // --- View State (New vs Manage) ---
+  const [activeTab, setActiveTab] = useState<'new' | 'manage'>('manage');
+
+  // --- Public Data State (For New Property) ---
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [location, setLocation] = useState(COMMUNES[0]);
+  const [price, setPrice] = useState<number>(0);
+  const [currency, setCurrency] = useState('UF'); 
+  const [type, setType] = useState<PropertyType>(PropertyType.VILLA);
+  const [bedrooms, setBedrooms] = useState(1);
+  const [bathrooms, setBathrooms] = useState(1);
+  const [area, setArea] = useState(0);
+  const [imageUrl, setImageUrl] = useState('');
+  const [description, setDescription] = useState('');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [isPremium, setIsPremium] = useState(false); 
+  const [status, setStatus] = useState<'published' | 'paused'>('published');
+
+  // --- Private Data State ---
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerPhone, setOwnerPhone] = useState('');
+  const [legalDescription, setLegalDescription] = useState('');
+  const [privateNotes, setPrivateNotes] = useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === 'admin123') {
+        setIsAuthenticated(true);
+    } else {
+        setLoginError('Contraseña incorrecta');
+    }
+  };
+
+  const toggleAmenity = (amenity: string) => {
+    if (selectedAmenities.includes(amenity)) {
+      setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
+    } else {
+      setSelectedAmenities([...selectedAmenities, amenity]);
+    }
+  };
+
+  const handleToggleStatus = (property: Property) => {
+    if (!onUpdateProperty) return;
+    const newStatus = property.status === 'paused' ? 'published' : 'paused';
+    onUpdateProperty({ ...property, status: newStatus });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const newProperty: Property = {
+      id: `custom-${Date.now()}`,
+      title,
+      subtitle: subtitle || title,
+      location: `${location}, Chile`,
+      price,
+      currency,
+      type,
+      bedrooms,
+      bathrooms,
+      area,
+      imageUrl: imageUrl || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
+      description,
+      amenities: selectedAmenities,
+      isPremium,
+      status, // Use the selected status
+      privateData: {
+        ownerName,
+        ownerPhone,
+        legalDescription,
+        privateNotes
+      }
     };
 
-    // Lógica de Envío del Formulario (Añadir O Actualizar) - ASÍNCRONA
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isAuthenticated) return; 
+    onAddProperty(newProperty);
+  };
 
-        // 💡 Convertir inputs de string a number y asegurar valores por defecto/mínimos
-        const parsedPrice = parseInt(priceInput) || 0;
-        const parsedBedrooms = parseInt(bedroomsInput) || 1;
-        const parsedBathrooms = parseInt(bathroomsInput) || 1;
-        const parsedArea = parseInt(areaInput) || 0;
-
-        // Asegurar que el currency sea uno de los tipos válidos
-        const validCurrency = (['UF', '$', 'USD', '€'] as const).includes(currency) ? currency : 'UF';
-        
-        const propertyData: Property = {
-            id: id || `custom-${Date.now()}`, // Usa el ID existente o genera uno nuevo
-            title: title.trim(),
-            subtitle: subtitle.trim() || title.trim(), // Si no hay sub, usa el título
-            location: `${location.trim()}, Chile`, // Formato consistente
-            price: parsedPrice,
-            currency: validCurrency,
-            type,
-            bedrooms: parsedBedrooms,
-            bathrooms: parsedBathrooms,
-            area: parsedArea,
-            imageUrl: imageUrl.trim() || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=800&auto=format&fit=crop', 
-            description: description.trim(),
-            amenities: selectedAmenities,
-            isPremium, 
-            isPublished, 
-            privateData: {
-                ownerName: ownerName.trim(),
-                ownerPhone: ownerPhone.trim(),
-                legalDescription: legalDescription.trim(),
-                privateNotes: privateNotes.trim()
-            }
-        };
-
-        try {
-            if (id) {
-                // MODO EDICIÓN: Llama a la función de actualización
-                await onUpdateProperty(propertyData); 
-                alert('Propiedad actualizada con éxito.');
-            } else {
-                // MODO NUEVO: Llama a la función de adición
-                await onAddProperty(propertyData);
-                alert('Propiedad creada con éxito.');
-            }
-            
-            resetForm(); // Limpia el formulario y sale del modo edición/creación
-        } catch (submitError) {
-            // Manejo de errores de la API
-            console.error('Error al guardar la propiedad:', submitError);
-            alert('Error al guardar la propiedad. Consulte la consola para más detalles.');
-        }
-    };
-    
-    // Funciones de control de la tabla
-    const handleEdit = (property: Property) => {
-        setEditingProperty(property); 
-        setIsNewProperty(false); 
-    };
-    
-    const handleCreateNew = () => {
-        resetForm();
-        setIsNewProperty(true); 
-    };
-
-    // Función de eliminación - ASÍNCRONA
-    const handleDelete = async (propertyId: string) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar esta propiedad? Esta acción es permanente.')) {
-            try {
-                await onDeleteProperty(propertyId);
-                alert('Propiedad eliminada con éxito.');
-                // Si estaba editando la que se eliminó, resetear el formulario
-                if (editingProperty && editingProperty.id === propertyId) {
-                    resetForm();
-                }
-            } catch (deleteError) {
-                console.error('Error al eliminar la propiedad:', deleteError);
-                alert('Error al eliminar la propiedad. Consulte la consola para más detalles.');
-            }
-        }
-    };
-    
-    // -----------------------------------------------------------
-    // RENDERIZADO CONDICIONAL
-    // -----------------------------------------------------------
-
-    if (!isAuthenticated) {
-        // PANTALLA DE LOGIN
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="p-8 bg-white shadow-lg rounded-lg max-w-sm w-full">
-                    <h2 className="font-serif text-2xl text-center text-leroy-black mb-6">Acceso a Administración</h2>
-                    <input
-                        type="password"
+  // --- Render Login Screen if not authenticated ---
+  if (!isAuthenticated) {
+    return (
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 pt-20">
+            <div className="bg-white p-8 md:p-12 rounded-sm shadow-xl max-w-md w-full text-center border-t-4 border-leroy-black">
+                <div className="mb-6 flex justify-center">
+                    <div className="font-serif font-semibold tracking-tighter flex items-baseline text-leroy-black select-none opacity-50">
+                        <span className="text-2xl">L</span>
+                        <span className="text-xl">e</span>
+                        <span className="text-2xl -ml-0.5">R</span>
+                    </div>
+                </div>
+                <h2 className="font-serif text-2xl text-leroy-black mb-2">Acceso Restringido</h2>
+                <p className="text-gray-500 text-sm mb-8 font-sans">Área exclusiva para administradores.</p>
+                
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <input 
+                        type="password" 
                         value={passwordInput}
-                        onChange={(e) => setPasswordInput(e.target.value)}
-                        placeholder="Contraseña Maestra"
-                        className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-leroy-gold"
-                        onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                        onChange={(e) => {
+                            setPasswordInput(e.target.value);
+                            setLoginError('');
+                        }}
+                        placeholder="Contraseña"
+                        className="w-full border border-gray-300 p-3 text-sm focus:border-leroy-gold focus:outline-none transition-colors rounded-none placeholder-gray-300"
+                        autoFocus
                     />
-                    <button
-                        onClick={handleLogin}
-                        className="w-full bg-leroy-black text-white px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
-                    >
+                    {loginError && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest animate-pulse">{loginError}</p>}
+                    
+                    <button type="submit" className="w-full bg-leroy-black text-white py-3 text-xs font-bold uppercase tracking-widest hover:bg-leroy-gold transition-colors duration-300">
                         Ingresar
                     </button>
-                    {error && <p className="text-red-500 text-xs mt-3 text-center">{error}</p>}
-                    <button type="button" onClick={onCancel} className="w-full text-center mt-4 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-black">
-                        Volver al Inicio
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // PANTALLA 1: TABLA DE GESTIÓN (Si NO estamos editando ni añadiendo)
-    if (!editingProperty && !isNewProperty) {
-        return (
-            <div className="pt-32 pb-20 min-h-screen bg-gray-50">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center mb-8">
-                        <h1 className="font-serif text-3xl text-leroy-black">Gestión de Propiedades ({properties.length})</h1>
-                        <div className="flex space-x-4">
-                            <button 
-                                onClick={handleCreateNew} 
-                                className="bg-leroy-gold text-white px-6 py-3 rounded text-xs font-bold uppercase tracking-widest hover:bg-yellow-600 transition-colors"
-                            >
-                                + Crear Nueva Propiedad
-                            </button>
-                            <button type="button" onClick={onCancel} className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black">
-                                Cerrar Sesión
-                            </button>
-                        </div>
-                    </div>
-                    
-                    {/* Tabla de Propiedades */}
-                    <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ubicación</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {properties.map((property) => (
-                                    <tr key={property.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{property.title}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{property.location.split(',')[0]}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {property.currency} {property.price.toLocaleString('es-CL')}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{property.type}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${property.isPublished ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                                {property.isPublished ? 'Publicada' : 'Borrador'}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button 
-                                                onClick={() => handleEdit(property)} 
-                                                className="text-leroy-black hover:text-leroy-gold mr-3 transition-colors"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDelete(property.id)} 
-                                                className="text-red-600 hover:text-red-900 transition-colors"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {properties.length === 0 && (
-                        <p className="mt-8 text-center text-gray-500">Aún no hay propiedades en el sistema.</p>
-                    )}
-                </div>
-            </div>
-        );
-    }
-
-    // PANTALLA 2: FORMULARIO (Si estamos editando o añadiendo)
-    return (
-        <div className="pt-24 pb-20 min-h-screen bg-gray-50">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="font-serif text-3xl text-leroy-black mb-6">
-                    {id ? 'Editar Propiedad Existente' : 'Agregar Nueva Propiedad'}
-                </h1>
-                
-                <form onSubmit={handleSubmit} className="space-y-8 bg-white p-8 shadow rounded-lg">
-                    
-                    {/* --- CONTROL DE ESTADO --- */}
-                    <div className="flex justify-between items-center border-b pb-4 mb-6">
-                        <button 
-                            type="button" 
-                            onClick={resetForm} // Vuelve a la lista de gestión
-                            className="text-sm font-bold uppercase tracking-wider text-gray-500 hover:text-black transition-colors"
-                        >
-                            &larr; Volver a la Lista
-                        </button>
-                        
-                        <div className="flex items-center space-x-6">
-                            {/* Control Premium */}
-                            <label className="flex items-center space-x-3 cursor-pointer select-none">
-                                <span className="text-xs font-bold uppercase tracking-widest text-leroy-black">Clasificación Premium</span>
-                                <div className="relative">
-                                    <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-leroy-gold"></div>
-                                </div>
-                            </label>
-
-                            {/* Control Publicado */}
-                            <label className="flex items-center space-x-4 cursor-pointer select-none">
-                                <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${isPublished ? 'text-green-600' : 'text-gray-500'}`}>
-                                    {isPublished ? 'PUBLICADA' : 'BORRADOR'}
-                                </span>
-                                <div className="relative">
-                                    <input type="checkbox" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    {/* --- SECCIÓN DATOS PÚBLICOS --- */}
-                    <div className="border-b border-gray-200 pb-5">
-                        <h2 className="text-xl font-semibold leading-7 text-gray-900">1. Información de Publicación</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">Detalles visibles para los clientes en el sitio web.</p>
-                    </div>
-                    
-                    {/* Título y Subtítulo */}
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                        <div className="sm:col-span-3">
-                            <label htmlFor="title" className="block text-sm font-medium leading-6 text-gray-900">Título</label>
-                            <input
-                                type="text" id="title" required
-                                value={title} onChange={(e) => setTitle(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                        <div className="sm:col-span-3">
-                            <label htmlFor="subtitle" className="block text-sm font-medium leading-6 text-gray-900">Subtítulo (Opcional)</label>
-                            <input
-                                type="text" id="subtitle"
-                                value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Ubicación y Tipo */}
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                        <div className="sm:col-span-3">
-                            <label htmlFor="location" className="block text-sm font-medium leading-6 text-gray-900">Ubicación (Comuna)</label>
-                            <select
-                                id="location" required
-                                value={location} onChange={(e) => setLocation(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            >
-                                {COMMUNES.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                        </div>
-                        <div className="sm:col-span-3">
-                            <label htmlFor="type" className="block text-sm font-medium leading-6 text-gray-900">Tipo de Propiedad</label>
-                            <select
-                                id="type" required
-                                value={type} onChange={(e) => setType(e.target.value as PropertyType)} 
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            >
-                                {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Precio y Moneda */}
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                        <div className="sm:col-span-3">
-                            <label htmlFor="price" className="block text-sm font-medium leading-6 text-gray-900">Precio</label>
-                            <input
-                                type="number" id="price" required min="0" step="1"
-                                value={priceInput} onChange={(e) => setPriceInput(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                        <div className="sm:col-span-3">
-                            <label htmlFor="currency" className="block text-sm font-medium leading-6 text-gray-900">Moneda</label>
-                            <select
-                                id="currency" required
-                                value={currency} onChange={(e) => setCurrency(e.target.value as 'UF' | '$' | 'USD' | '€')}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            >
-                                <option value="UF">UF</option>
-                                <option value="$">Pesos (CLP)</option>
-                                <option value="USD">USD</option>
-                                <option value="€">€</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Habitaciones, Baños y Área */}
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                        <div className="sm:col-span-2">
-                            <label htmlFor="bedrooms" className="block text-sm font-medium leading-6 text-gray-900">Habitaciones</label>
-                            <input
-                                type="number" id="bedrooms" required min="1"
-                                value={bedroomsInput} onChange={(e) => setBedroomsInput(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                        <div className="sm:col-span-2">
-                            <label htmlFor="bathrooms" className="block text-sm font-medium leading-6 text-gray-900">Baños</label>
-                            <input
-                                type="number" id="bathrooms" required min="1"
-                                value={bathroomsInput} onChange={(e) => setBathroomsInput(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                        <div className="sm:col-span-2">
-                            <label htmlFor="area" className="block text-sm font-medium leading-6 text-gray-900">Área (m²)</label>
-                            <input
-                                type="number" id="area" required min="1"
-                                value={areaInput} onChange={(e) => setAreaInput(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                    </div>
-
-                    {/* URL de Imagen */}
-                    <div>
-                        <label htmlFor="imageUrl" className="block text-sm font-medium leading-6 text-gray-900">URL de Imagen Principal</label>
-                        <input
-                            type="url" id="imageUrl"
-                            value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
-                            placeholder="https://images.unsplash.com/..."
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                        />
-                    </div>
-
-                    {/* Descripción */}
-                    <div>
-                        <label htmlFor="description" className="block text-sm font-medium leading-6 text-gray-900">Descripción Larga</label>
-                        <textarea
-                            id="description" rows={5} required
-                            value={description} onChange={(e) => setDescription(e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            placeholder="Describa la propiedad, el entorno y los detalles de lujo..."
-                        />
-                    </div>
-
-                    {/* Amenidades */}
-                    <div>
-                        <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">Amenidades</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                            {COMMON_AMENITIES.map(amenity => (
-                                <div key={amenity} className="flex items-center">
-                                    <input
-                                        id={`amenity-${amenity}`}
-                                        type="checkbox"
-                                        checked={selectedAmenities.includes(amenity)}
-                                        onChange={() => toggleAmenity(amenity)}
-                                        className="h-4 w-4 text-leroy-gold border-gray-300 rounded focus:ring-leroy-gold"
-                                    />
-                                    <label htmlFor={`amenity-${amenity}`} className="ml-2 block text-sm text-gray-900">
-                                        {amenity}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    
-
-                    {/* --- SECCIÓN DATOS PRIVADOS --- */}
-                    <div className="border-t border-gray-200 pt-8 mt-8">
-                        <h2 className="text-xl font-semibold leading-7 text-gray-900">2. Información Privada (Administración)</h2>
-                        <p className="mt-1 text-sm leading-6 text-gray-600">Estos detalles son internos y no se publican.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-                        {/* Dueño y Teléfono */}
-                        <div className="sm:col-span-3">
-                            <label htmlFor="ownerName" className="block text-sm font-medium leading-6 text-gray-900">Nombre del Propietario</label>
-                            <input
-                                type="text" id="ownerName"
-                                value={ownerName} onChange={(e) => setOwnerName(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                        <div className="sm:col-span-3">
-                            <label htmlFor="ownerPhone" className="block text-sm font-medium leading-6 text-gray-900">Teléfono del Propietario</label>
-                            <input
-                                type="tel" id="ownerPhone"
-                                value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                            />
-                        </div>
-
-                        {/* Descripción Legal */}
-                        <div className="sm:col-span-6">
-                            <label htmlFor="legalDescription" className="block text-sm font-medium leading-6 text-gray-900">Descripción Legal / Rol</label>
-                            <textarea
-                                id="legalDescription" rows={2}
-                                value={legalDescription} onChange={(e) => setLegalDescription(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                                placeholder="Datos legales, rol, y cualquier identificador."
-                            />
-                        </div>
-                        
-                        {/* Notas Privadas */}
-                        <div className="sm:col-span-6">
-                            <label htmlFor="privateNotes" className="block text-sm font-medium leading-6 text-gray-900">Notas Internas</label>
-                            <textarea
-                                id="privateNotes" rows={3}
-                                value={privateNotes} onChange={(e) => setPrivateNotes(e.target.value)}
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
-                                placeholder="Notas internas para el equipo de ventas o administración."
-                            />
-                        </div>
-                    </div>
-
-
-                    {/* --- BOTONES DE ACCIÓN --- */}
-                    <div className="pt-5 border-t mt-8 flex justify-end">
-                        <button
-                            type="button"
-                            onClick={resetForm}
-                            className="mr-4 text-sm font-semibold leading-6 text-gray-900 hover:text-red-600 transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="inline-flex justify-center rounded-md bg-leroy-black px-6 py-3 text-sm font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-800 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-leroy-gold"
-                        >
-                            {id ? 'Guardar Cambios' : 'Crear Propiedad'}
-                        </button>
-                    </div>
                 </form>
+
+                <button onClick={onCancel} className="mt-8 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black transition-colors">
+                    Volver al sitio
+                </button>
             </div>
         </div>
     );
+  }
+
+  // --- Render Admin Dashboard ---
+  return (
+    <div className="pt-28 pb-20 min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="flex justify-between items-center mb-8">
+          <div>
+              <h1 className="font-serif text-3xl text-leroy-black mb-2">Panel de Administración</h1>
+              <p className="text-gray-500 text-sm">Gestione su inventario y publique nuevas propiedades.</p>
+          </div>
+          <button onClick={onCancel} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-leroy-black">
+            Cerrar Sesión
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg w-fit mb-8">
+            <button 
+                onClick={() => setActiveTab('manage')}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'manage' ? 'bg-white text-leroy-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                Inventario
+            </button>
+            <button 
+                onClick={() => setActiveTab('new')}
+                className={`px-6 py-2 text-xs font-bold uppercase tracking-widest rounded-md transition-all ${activeTab === 'new' ? 'bg-white text-leroy-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            >
+                Crear Propiedad
+            </button>
+        </div>
+
+        {activeTab === 'manage' ? (
+            /* --- INVENTORY MANAGEMENT TAB --- */
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold uppercase tracking-widest text-gray-500">
+                                <th className="p-4">Propiedad</th>
+                                <th className="p-4">Ubicación</th>
+                                <th className="p-4">Precio</th>
+                                <th className="p-4 text-center">Estado</th>
+                                <th className="p-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {properties.map(prop => (
+                                <tr key={prop.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-3">
+                                            <img src={prop.imageUrl} alt="" className="w-12 h-12 object-cover rounded-sm bg-gray-200" />
+                                            <div>
+                                                <p className="font-serif text-sm text-leroy-black font-semibold truncate max-w-[200px]">{prop.title}</p>
+                                                <p className="text-[10px] text-gray-400 uppercase tracking-wider">{prop.type}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="p-4 text-sm text-gray-600">{prop.location}</td>
+                                    <td className="p-4 text-sm font-bold text-gray-800">
+                                        {prop.currency} {prop.price.toLocaleString('es-CL')}
+                                    </td>
+                                    <td className="p-4 text-center">
+                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${prop.status === 'paused' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+                                            {prop.status === 'paused' ? 'En Pausa' : 'Publicada'}
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button 
+                                            onClick={() => handleToggleStatus(prop)}
+                                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded border transition-colors ${
+                                                prop.status === 'paused' 
+                                                ? 'border-green-600 text-green-600 hover:bg-green-50' 
+                                                : 'border-yellow-600 text-yellow-600 hover:bg-yellow-50'
+                                            }`}
+                                        >
+                                            {prop.status === 'paused' ? 'Publicar' : 'Pausar'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        ) : (
+            /* --- NEW PROPERTY FORM TAB --- */
+            <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-300">
+            
+            {/* Public Data Section */}
+            <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center border-b pb-2 mb-6">
+                    <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold">
+                    Datos Públicos
+                    </h2>
+                    
+                    <div className="flex items-center gap-6">
+                        {/* Status Toggle for New Property */}
+                        <div className="flex items-center gap-2">
+                             <label className="text-xs font-bold uppercase text-gray-500">Estado Inicial:</label>
+                             <select 
+                                value={status} 
+                                onChange={(e) => setStatus(e.target.value as 'published' | 'paused')}
+                                className="text-xs border-gray-300 rounded focus:ring-0 focus:border-leroy-black"
+                             >
+                                <option value="published">Publicada</option>
+                                <option value="paused">En Pausa (Borrador)</option>
+                             </select>
+                        </div>
+
+                        {/* Premium Toggle */}
+                        <label className="flex items-center space-x-3 cursor-pointer select-none">
+                            <span className="text-xs font-bold uppercase tracking-widest text-leroy-black">Premium</span>
+                            <div className="relative">
+                                <input 
+                                    type="checkbox" 
+                                    checked={isPremium} 
+                                    onChange={(e) => setIsPremium(e.target.checked)} 
+                                    className="sr-only peer" 
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-leroy-gold"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Título Principal</label>
+                    <input required type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" placeholder="Ej: Espectacular Casa en El Venado" />
+                </div>
+
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Subtítulo / Bajada</label>
+                    <input type="text" value={subtitle} onChange={e => setSubtitle(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" placeholder="Ej: Propiedad heredada poco común en las fincas..." />
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Ubicación</label>
+                    <select value={location} onChange={e => setLocation(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0">
+                    {COMMUNES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Tipo</label>
+                    <select value={type} onChange={e => setType(e.target.value as PropertyType)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0">
+                    {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Precio</label>
+                    <input required type="number" min="0" value={price} onChange={e => setPrice(Number(e.target.value))} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0" />
+                </div>
+
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Moneda</label>
+                    <select value={currency} onChange={e => setCurrency(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm focus:border-leroy-gold focus:ring-0">
+                    <option value="UF">UF</option>
+                    <option value="$">Pesos (CLP)</option>
+                    <option value="USD">Dólares (USD)</option>
+                    </select>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 col-span-2 md:col-span-1">
+                    <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Dormitorios</label>
+                    <input type="number" min="0" value={bedrooms} onChange={e => setBedrooms(Number(e.target.value))} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" />
+                    </div>
+                    <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">Baños</label>
+                    <input type="number" min="0" value={bathrooms} onChange={e => setBathrooms(Number(e.target.value))} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" />
+                    </div>
+                    <div>
+                    <label className="block text-[10px] font-bold uppercase text-gray-500 mb-1">M2 Totales</label>
+                    <input type="number" min="0" value={area} onChange={e => setArea(Number(e.target.value))} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" />
+                    </div>
+                </div>
+
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">URL Imagen</label>
+                    <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm" placeholder="https://..." />
+                </div>
+
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-1">Descripción</label>
+                    <textarea required rows={5} value={description} onChange={e => setDescription(e.target.value)} className="w-full border-gray-200 bg-gray-50 p-3 rounded text-sm"></textarea>
+                </div>
+
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-500 mb-3">Amenities</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {COMMON_AMENITIES.map(amenity => (
+                        <label key={amenity} className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+                            <input 
+                            type="checkbox" 
+                            checked={selectedAmenities.includes(amenity)}
+                            onChange={() => toggleAmenity(amenity)}
+                            className="rounded text-leroy-black focus:ring-0" 
+                            />
+                            <span>{amenity}</span>
+                        </label>
+                        ))}
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            {/* Private Data Section */}
+            <div className="bg-red-50 p-8 rounded-lg shadow-sm border border-red-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-red-100 px-3 py-1 rounded-bl-lg text-[10px] font-bold text-red-800 uppercase tracking-widest">
+                Confidencial
+                </div>
+                <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-red-800 mb-6 border-b border-red-200 pb-2">
+                Datos Privados
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Nombre Propietario</label>
+                    <input type="text" value={ownerName} onChange={e => setOwnerName(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+                </div>
+                <div>
+                    <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Teléfono</label>
+                    <input type="text" value={ownerPhone} onChange={e => setOwnerPhone(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+                </div>
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Datos Legales</label>
+                    <input type="text" value={legalDescription} onChange={e => setLegalDescription(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm" />
+                </div>
+                <div className="col-span-2">
+                    <label className="block text-xs font-bold uppercase text-gray-600 mb-1">Notas Internas</label>
+                    <textarea rows={3} value={privateNotes} onChange={e => setPrivateNotes(e.target.value)} className="w-full border-red-100 bg-white p-3 rounded text-sm"></textarea>
+                </div>
+                </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+                <button type="submit" className="bg-leroy-black text-white px-10 py-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg">
+                Guardar Propiedad
+                </button>
+            </div>
+
+            </form>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default AdminView;
