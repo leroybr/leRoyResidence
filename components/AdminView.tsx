@@ -361,4 +361,185 @@ const AdminView: React.FC<AdminViewProps> = ({
                           <input
                               type="text" id="subtitle"
                               value={subtitle} onChange={(e) => setSubtitle(e.target.value)}
-                              className="
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          />
+                      </div>
+                  </div>
+
+                  {/* Ubicación y Tipo */}
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                      <div className="sm:col-span-3">
+                          <label htmlFor="location" className="block text-sm font-medium leading-6 text-gray-900">Ubicación (Comuna)</label>
+                          <select
+                              id="location" required
+                              value={location} onChange={(e) => setLocation(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          >
+                              {COMMUNES.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                      </div>
+                      <div className="sm:col-span-3">
+                          <label htmlFor="type" className="block text-sm font-medium leading-6 text-gray-900">Tipo de Propiedad</label>
+                          <select
+                              id="type" required
+                              value={type} onChange={(e) => setType(e.target.value as PropertyType)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          >
+                              {Object.values(PropertyType).map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                      </div>
+                  </div>
+
+                  {/* Precio y Moneda */}
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                      <div className="sm:col-span-3">
+                          <label htmlFor="price" className="block text-sm font-medium leading-6 text-gray-900">Precio</label>
+                          <input
+                              type="number" id="price" required min="0" step="1"
+                              value={price} onChange={(e) => setPrice(parseInt(e.target.value))}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          />
+                      </div>
+                      <div className="sm:col-span-3">
+                          <label htmlFor="currency" className="block text-sm font-medium leading-6 text-gray-900">Moneda</label>
+                          <select
+                              id="currency" required
+                              value={currency} onChange={(e) => setCurrency(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          >
+                              <option value="UF">UF</option>
+                              <option value="$">Pesos (CLP)</option>
+                              <option value="USD">USD</option>
+                              <option value="€">€</option>
+                          </select>
+                      </div>
+                  </div>
+
+                  {/* Habitaciones, Baños y Área */}
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                      <div className="sm:col-span-2">
+                          <label htmlFor="bedrooms" className="block text-sm font-medium leading-6 text-gray-900">Habitaciones</label>
+                          <input
+                              type="number" id="bedrooms" required min="1"
+                              value={bedrooms} onChange={(e) => setBedrooms(parseInt(e.target.value))}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          />
+                      </div>
+                      <div className="sm:col-span-2">
+                          <label htmlFor="bathrooms" className="block text-sm font-medium leading-6 text-gray-900">Baños</label>
+                          <input
+                              type="number" id="bathrooms" required min="1"
+                              value={bathrooms} onChange={(e) => setBathrooms(parseInt(e.target.value))}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          />
+                      </div>
+                      <div className="sm:col-span-2">
+                          <label htmlFor="area" className="block text-sm font-medium leading-6 text-gray-900">Área (m²)</label>
+                          <input
+                              type="number" id="area" required min="1"
+                              value={area} onChange={(e) => setArea(parseInt(e.target.value))}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          />
+                      </div>
+                  </div>
+
+                  {/* URL de Imagen */}
+                  <div>
+                      <label htmlFor="imageUrl" className="block text-sm font-medium leading-6 text-gray-900">URL de Imagen Principal</label>
+                      <input
+                          type="url" id="imageUrl"
+                          value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}
+                          placeholder="https://images.unsplash.com/..."
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                      />
+                  </div>
+
+                  {/* Descripción */}
+                  <div>
+                      <label htmlFor="description" className="block text-sm font-medium leading-6 text-gray-900">Descripción Larga</label>
+                      <textarea
+                          id="description" rows={5} required
+                          value={description} onChange={(e) => setDescription(e.target.value)}
+                          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-leroy-gold sm:text-sm sm:leading-6"
+                          placeholder="Describa la propiedad, el entorno y los detalles de lujo..."
+                      />
+                  </div>
+
+                  {/* Amenidades */}
+                  <div>
+                      <label className="block text-sm font-medium leading-6 text-gray-900 mb-2">Amenidades</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {COMMON_AMENITIES.map(amenity => (
+                              <div key={amenity} className="flex items-center">
+                                  <input
+                                      id={`amenity-${amenity}`}
+                                      type="checkbox"
+                                      checked={selectedAmenities.includes(amenity)}
+                                      onChange={() => toggleAmenity(amenity)}
+                                      className="h-4 w-4 rounded border-gray-300 text-leroy-gold focus:ring-leroy-gold"
+                                  />
+                                  <label htmlFor={`amenity-${amenity}`} className="ml-3 text-sm text-gray-600">{amenity}</label>
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+
+                  {/* --- SECCIÓN DATOS PRIVADOS --- */}
+                  <div className="border-b border-gray-200 pb-5 pt-8">
+                      <h2 className="text-xl font-semibold leading-7 text-red-700">2. Datos Privados (Confidencial)</h2>
+                      <p className="mt-1 text-sm leading-6 text-gray-600">Solo para uso interno: información de contacto del dueño y legal.</p>
+                  </div>
+                  
+                  {/* Dueño y Contacto */}
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                      <div className="sm:col-span-3">
+                          <label htmlFor="ownerName" className="block text-sm font-medium leading-6 text-gray-900">Nombre del Propietario</label>
+                          <input
+                              type="text" id="ownerName"
+                              value={ownerName} onChange={(e) => setOwnerName(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 bg-red-50"
+                          />
+                      </div>
+                      <div className="sm:col-span-3">
+                          <label htmlFor="ownerPhone" className="block text-sm font-medium leading-6 text-gray-900">Teléfono / Contacto</label>
+                          <input
+                              type="text" id="ownerPhone"
+                              value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 bg-red-50"
+                          />
+                      </div>
+                      <div className="sm:col-span-6">
+                          <label htmlFor="legalDescription" className="block text-sm font-medium leading-6 text-gray-900">Datos Legales (Rol, Inscripción, etc.)</label>
+                          <input
+                              type="text" id="legalDescription"
+                              value={legalDescription} onChange={(e) => setLegalDescription(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 bg-red-50"
+                          />
+                      </div>
+                      <div className="sm:col-span-6">
+                          <label htmlFor="privateNotes" className="block text-sm font-medium leading-6 text-gray-900">Notas Internas</label>
+                          <textarea
+                              id="privateNotes" rows={3}
+                              value={privateNotes} onChange={(e) => setPrivateNotes(e.target.value)}
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 bg-red-50"
+                              placeholder="Acuerdos de comisión, disponibilidad de llaves, puntos de negociación, etc."
+                          />
+                      </div>
+                  </div>
+
+                  <div className="flex justify-end pt-4 border-t border-gray-100 mt-8">
+                      <button 
+                          type="submit" 
+                          className="bg-leroy-black text-white px-10 py-4 rounded text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors shadow-lg"
+                      >
+                          {id ? 'Guardar Cambios' : (isPublished ? 'Crear y PUBLICAR' : 'Crear como BORRADOR')}
+                      </button>
+                  </div>
+
+              </form>
+          </div>
+      </div>
+  );
+};
+
+export default AdminView;
