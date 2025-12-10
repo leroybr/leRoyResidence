@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { HeroSearchState } from '../types';
-// NOTA: Se comenta la importación local de COMMUNES, ahora se recibe por props
+// NOTA: Se ha quitado la importación de COMMUNES aquí para que se reciba por props desde App.tsx
 // import { COMMUNES } from '../constants'; 
 
 interface HeroProps {
   onSearch: (filters: HeroSearchState) => void;
   onNavigate: (view: string, category?: string) => void; // <--- AGREGADO: Necesario para que coincida con App.tsx
-  communes: string[]; // <--- AGREGADO: Para usar la lista de ubicaciones
+  communes: string[];                                   // <--- AGREGADO: Para usar la lista de ubicaciones
 }
 
 const HERO_IMAGES = [
@@ -17,7 +17,8 @@ const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?q=80&w=2560&auto=format&fit=crop"
 ];
 
-// Se eliminó 'isSearching' ya que no se usaba en el componente
+// Se eliminó 'isSearching' que estaba en tu código original, ya que no se utilizaba en el componente
+// y causaba que App.tsx tuviera que pasar una prop innecesaria.
 const Hero: React.FC<HeroProps> = ({ onSearch, onNavigate, communes }) => { // <--- CAMBIADO
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
@@ -108,7 +109,7 @@ const Hero: React.FC<HeroProps> = ({ onSearch, onNavigate, communes }) => { // <
                  className="w-full bg-transparent border-none focus:ring-0 text-gray-800 text-sm md:text-xs font-bold uppercase tracking-wide h-6 outline-none cursor-pointer appearance-none"
                >
                  <option value="">Ubicación (Cualquiera)</option>
-                 {communes.map((commune) => ( // <--- USANDO PROP 'communes'
+                 {communes.map((commune) => ( // <--- USANDO LA PROP 'communes'
                    <option key={commune} value={commune}>{commune}</option>
                  ))}
                </select>
