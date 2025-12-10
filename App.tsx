@@ -3,8 +3,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 import { PropertyCard } from './components/PropertyCard';
-// 🛑 CORRECCIÓN TS2613: Se corrige la importación de ListingView
-import { ListingView } from './components/ListingView'; 
+import { ListingView } from './components/ListingView'; // Importación corregida
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
 import ShowroomView from './components/ShowroomView';
@@ -158,8 +157,7 @@ const App: React.FC = () => {
                       <PropertyCard 
                         property={property} 
                         onClick={() => handlePropertyClick(property)} 
-                        // 🛑 CORRECCIÓN TS2322: Se remueve la prop onGoHome aquí ya que no es necesaria
-                        // y causaba el error TS2322 porque PropertyCard.tsx no la acepta.
+                        // onGoHome fue removido para evitar TS2322 en App.tsx
                       />
                     </div>
                   ))}
@@ -247,3 +245,21 @@ const App: React.FC = () => {
       
       case 'admin':
         return <AdminView onAddProperty={handleAddProperty} onCancel={() => handleNavigate('home')} />;
+
+      default:
+        return <div>Página no encontrada</div>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-white flex flex-col font-sans">
+      <Header currentView={currentView} onNavigate={handleNavigate} />
+      <main className="flex-grow">
+        {renderContent()}
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default App;
