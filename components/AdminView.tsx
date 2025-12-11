@@ -6,7 +6,7 @@ interface AdminViewProps {
   onAddProperty: (property: Property) => void;
   onUpdateProperty?: (property: Property) => void;
   onCancel: () => void;
-  properties?: Property[]; // New prop for managing inventory
+  properties?: Property[];
 }
 
 const COMMON_AMENITIES = [
@@ -16,15 +16,12 @@ const COMMON_AMENITIES = [
 ];
 
 const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properties = [], onUpdateProperty }) => {
-  // --- Auth State ---
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
-  
-  // --- View State (New vs Manage) ---
   const [activeTab, setActiveTab] = useState<'new' | 'manage'>('manage');
 
-  // --- Public Data State (For New Property) ---
+  // Form State
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [location, setLocation] = useState(COMMUNES[0]);
@@ -40,7 +37,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
   const [isPremium, setIsPremium] = useState(false); 
   const [status, setStatus] = useState<'published' | 'paused'>('published');
 
-  // --- Private Data State ---
+  // Private Data State
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
   const [legalDescription, setLegalDescription] = useState('');
@@ -65,7 +62,8 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
 
   const handleToggleStatus = (property: Property) => {
     if (!onUpdateProperty) return;
-    const newStatus = property.status === 'paused' ? 'published' : 'paused';
+    const currentStatus = property.status || 'published';
+    const newStatus = currentStatus === 'paused' ? 'published' : 'paused';
     onUpdateProperty({ ...property, status: newStatus });
   };
 
@@ -87,7 +85,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
       description,
       amenities: selectedAmenities,
       isPremium,
-      status, // Use the selected status
+      status,
       privateData: {
         ownerName,
         ownerPhone,
@@ -99,7 +97,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
     onAddProperty(newProperty);
   };
 
-  // --- Render Login Screen if not authenticated ---
   if (!isAuthenticated) {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 pt-20">
@@ -141,7 +138,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
     );
   }
 
-  // --- Render Admin Dashboard ---
   return (
     <div className="pt-28 pb-20 min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +152,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex space-x-1 bg-gray-200 p-1 rounded-lg w-fit mb-8">
             <button 
                 onClick={() => setActiveTab('manage')}
@@ -173,7 +168,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
         </div>
 
         {activeTab === 'manage' ? (
-            /* --- INVENTORY MANAGEMENT TAB --- */
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -226,10 +220,7 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
                 </div>
             </div>
         ) : (
-            /* --- NEW PROPERTY FORM TAB --- */
             <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-300">
-            
-            {/* Public Data Section */}
             <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
                 <div className="flex justify-between items-center border-b pb-2 mb-6">
                     <h2 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold">
@@ -237,7 +228,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
                     </h2>
                     
                     <div className="flex items-center gap-6">
-                        {/* Status Toggle for New Property */}
                         <div className="flex items-center gap-2">
                              <label className="text-xs font-bold uppercase text-gray-500">Estado Inicial:</label>
                              <select 
@@ -250,7 +240,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
                              </select>
                         </div>
 
-                        {/* Premium Toggle */}
                         <label className="flex items-center space-x-3 cursor-pointer select-none">
                             <span className="text-xs font-bold uppercase tracking-widest text-leroy-black">Premium</span>
                             <div className="relative">
@@ -349,7 +338,6 @@ const AdminView: React.FC<AdminViewProps> = ({ onAddProperty, onCancel, properti
                 </div>
             </div>
 
-            {/* Private Data Section */}
             <div className="bg-red-50 p-8 rounded-lg shadow-sm border border-red-100 relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-red-100 px-3 py-1 rounded-bl-lg text-[10px] font-bold text-red-800 uppercase tracking-widest">
                 Confidencial
