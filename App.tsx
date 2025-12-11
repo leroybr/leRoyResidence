@@ -1,6 +1,4 @@
-// App.tsx
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
@@ -9,314 +7,263 @@ import ListingView from './components/ListingView';
 import AdminView from './components/AdminView';
 import PropertyDetailView from './components/PropertyDetailView';
 import ShowroomView from './components/ShowroomView';
+import { MOCK_PROPERTIES } from './constants';
 import { Property, HeroSearchState } from './types';
 
-const UF_VALUE_CLP = 37800; // Valor aproximado de la UF en pesos chilenos
-
-// Definición de tipos de vista para mayor claridad en el estado
-type View = 'home' | 'listing' | 'detail' | 'showroom' | 'admin';
+const UF_VALUE_CLP = 37800;
 
 const App: React.FC = () => {
-  // [ESTADOS] Inicializamos el estado de propiedades como array vacío
-  const [properties, setProperties] = useState<Property[]>([]); 
-  const [isLoading, setIsLoading] = useState(true); 
-  const [currentView, setCurrentView] = useState<View>('home'); // Tipado de View
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
+  const [properties, setProperties] = useState<Property[]>(MOCK_PROPERTIES);
+  const [currentView, setCurrentView] = useState('home'); 
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [searchFilters, setSearchFilters] = useState<HeroSearchState | null>(null);
 
-  // --- LÓGICA: Carga de Propiedades desde la API ---
-  const fetchProperties = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // Llamada al endpoint API para obtener todas las propiedades guardadas
-      const response = await fetch('/api/properties');
-      if (!response.ok) {
-        throw new Error('Error al cargar las propiedades del servidor');
-      }
-      const data: Property[] = await response.json();
-      setProperties(data);
-    } catch (error) {
-      console.error("Fallo al obtener propiedades:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    const category = params.get('category');
+    
+    if (page === 'listing' && category) {
+      setCurrentView('listing');
+      setSelectedCategory(category);
+    } else if (page === 'showroom') {
+      setCurrentView('showroom');
+    } else if (page === 'admin') {
+      setCurrentView('admin');
+    }
+  }, []);
 
-  // --- Lógica de URL/Inicialización ---
-  useEffect(() => {
-    fetchProperties(); // Cargar propiedades al inicio
-    
-    const params = new URLSearchParams(window.location.search);
-    const page = params.get('page');
-    const category = params.get('category');
-    
-    if (page === 'listing' && category) {
-      setCurrentView('listing');
-      setSelectedCategory(category);
-    } else if (page === 'showroom') {
-      setCurrentView('showroom');
-    } else if (page === 'admin') {
-      setCurrentView('admin');
-    }
-  }, [fetchProperties]); 
+  useEffect(() => {
+    let title = 'LeRoy Residence | Corretaje de Propiedades';
 
-  // --- Lógica de Título de Página ---
-  useEffect(() => {
-    let title = 'LeRoy Residence | Corretaje de Propiedades';
+    if (currentView === 'home') title = 'LeRoy Residence | Inicio - Compra y Venta';
+    else if (currentView === 'showroom') title = 'Nuevas Tecnologías en Cocina | LeRoy';
+    else if (currentView === 'listing') {
+      if (selectedCategory === 'premium') title = 'Propiedades Premium | LeRoy';
+      else if (selectedCategory === 'bienes-raices') title = 'Bienes Raíces | LeRoy';
+      else title = `${selectedCategory} | LeRoy`;
+    }
+    else if (currentView === 'detail' && selectedProperty) title = `${selectedProperty.title} | LeRoy`;
+    else if (currentView === 'admin') title = 'Administración | LeRoy';
 
-    if (currentView === 'home') title = 'LeRoy Residence | Inicio - Compra y Venta';
-    else if (currentView === 'showroom') title = 'Nuevas Tecnologías en Cocina | LeRoy';
-    else if (currentView === 'listing') {
-      if (selectedCategory === 'premium') title = 'Propiedades Premium | LeRoy';
-      else if (selectedCategory === 'bienes-raices') title = 'Bienes Raíces | LeRoy';
-      else title = `${selectedCategory} | LeRoy`;
-    }
-    else if (currentView === 'detail' && selectedProperty) title = `${selectedProperty.title} | LeRoy`;
-    else if (currentView === 'admin') title = 'Administración | LeRoy';
+    document.title = title;
+  }, [currentView, selectedCategory, selectedProperty]);
 
-    document.title = title;
-  }, [currentView, selectedCategory, selectedProperty]);
+  const handleNavigate = (view: string, category: string = '') => {
+    setCurrentView(view);
+    setSelectedCategory(category);
+    setSearchFilters(null);
+    window.scrollTo(0, 0);
+  };
 
-  // --- Handlers de Navegación y Búsqueda ---
-  // El argumento 'view' se tipa como 'string' para compatibilidad con URLParams
-  const handleNavigate = (view: string, category: string = '') => {
-    setCurrentView(view as View); // Conversión a View tipada
-    setSelectedCategory(category);
-    setSearchFilters(null);
-    window.scrollTo(0, 0);
-  };
+  const handlePropertyClick = (property: Property) => {
+    setSelectedProperty(property);
+    setCurrentView('detail');
+    window.scrollTo(0, 0);
+  };
 
-  const handlePropertyClick = (property: Property) => {
-    setSelectedProperty(property);
-    setCurrentView('detail');
-    window.scrollTo(0, 0);
-  };
+  const handleHeroSearch = (filters: HeroSearchState) => {
+    setSearchFilters(filters);
+    
+    if (filters.location && filters.bedrooms === 'any' && filters.priceRange === 'any') {
+       handleNavigate('listing', filters.location);
+    } else {
+      handleNavigate('listing', 'Resultados de Búsqueda');
+    }
+  };
 
-  const handleHeroSearch = (filters: HeroSearchState) => {
-    setSearchFilters(filters);
-    
-    if (filters.location && filters.bedrooms === 'any' && filters.priceRange === 'any') {
-        handleNavigate('listing', filters.location);
-    } else {
-      handleNavigate('listing', 'Resultados de Búsqueda');
-    }
-  };
+  const handleAddProperty = (newProperty: Property) => {
+    const updatedProperties = [newProperty, ...properties];
+    setProperties(updatedProperties);
+    if (newProperty.status === 'published') {
+        handleNavigate('listing', 'Bienes Raíces');
+    } else {
+        alert('Propiedad guardada como "En Pausa". Puede activarla en la pestaña Inventario.');
+    }
+  };
 
-  // --- Handlers de Administración (CRUD) - PERSISTENTES ---
-  const handleAddProperty = async (newProperty: Property) => {
-    // Enviar la nueva propiedad a la API usando POST
-    try {
-      const response = await fetch('/api/properties', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newProperty),
-      });
+  const handleUpdateProperty = (updatedProperty: Property) => {
+    setProperties(prev => prev.map(p => p.id === updatedProperty.id ? updatedProperty : p));
+  };
 
-      if (response.ok) {
-        await fetchProperties(); // Recargar la lista
-        setCurrentView('admin');
-      } else {
-        console.error('Error al agregar propiedad:', await response.text());
-        alert('Error: No se pudo agregar la propiedad en el servidor.');
-      }
-    } catch (error) {
-      console.error('Fallo en la conexión de la API (POST):', error);
-      alert('Error de conexión con el servidor. Verifique la API.');
-    }
-  };
+  const getFilteredProperties = () => {
+    // 1. First, filter out PAUSED properties (Only show published ones to public)
+    let filtered = properties.filter(p => p.status !== 'paused');
 
-  const handleUpdateProperty = async (updatedProperty: Property) => {
-    // Enviar la propiedad actualizada a la API usando PUT
-    try {
-      const response = await fetch(`/api/properties?id=${updatedProperty.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProperty),
-      });
+    if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') {
+      if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
+         // Show all
+      } else if (selectedCategory === 'Premium Property') {
+          filtered = filtered.filter(p => p.isPremium);
+      } else {
+        filtered = filtered.filter(p => p.location.includes(selectedCategory));
+      }
+    }
 
-      if (response.ok) {
-        await fetchProperties(); // Recargar la lista
-        setCurrentView('admin');
-      } else {
-        console.error('Error al actualizar propiedad:', await response.text());
-        alert('Error: No se pudo actualizar la propiedad en el servidor.');
-      }
-    } catch (error) {
-      console.error('Fallo en la conexión de la API (PUT):', error);
-      alert('Error de conexión con el servidor. Verifique la API.');
-    }
-  };
+    if (searchFilters) {
+      if (searchFilters.location) {
+        filtered = filtered.filter(p => p.location.includes(searchFilters.location));
+      }
+      if (searchFilters.bedrooms !== 'any') {
+        const minBeds = parseInt(searchFilters.bedrooms);
+        filtered = filtered.filter(p => p.bedrooms >= minBeds);
+      }
+      if (searchFilters.priceRange !== 'any') {
+        const [minStr, maxStr] = searchFilters.priceRange.split('-');
+        let min = parseInt(minStr);
+        let max = maxStr === 'plus' ? Number.MAX_SAFE_INTEGER : parseInt(maxStr);
 
-  const handleDeleteProperty = async (propertyId: string) => {
-    // Enviar solicitud de eliminación a la API usando DELETE
-    if (!window.confirm("¿Estás seguro de que quieres eliminar esta propiedad?")) return;
+        filtered = filtered.filter(p => {
+            let priceInCLP = 0;
+            const currency = p.currency.trim();
+            
+            if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
+            else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950; 
+            else if (currency === '€') priceInCLP = p.price * 1020; 
+            else priceInCLP = p.price; 
+            
+            return priceInCLP >= min && priceInCLP <= max;
+        });
+      }
+    }
 
-    try {
-      const response = await fetch(`/api/properties?id=${propertyId}`, {
-        method: 'DELETE',
-      });
+    return filtered;
+  };
 
-      if (response.ok) {
-        await fetchProperties(); // Recargar la lista
-        setCurrentView('admin');
-      } else {
-        console.error('Error al eliminar propiedad:', await response.text());
-        alert('Error: No se pudo eliminar la propiedad en el servidor.');
-      }
-    } catch (error) {
-      console.error('Fallo en la conexión de la API (DELETE):', error);
-      alert('Error de conexión con el servidor. Verifique la API.');
-    }
-  };
-  // --- Fin Handlers de Administración (CRUD) ---
+  const renderContent = () => {
+    switch (currentView) {
+      case 'home':
+        return (
+          <>
+            <Hero onSearch={handleHeroSearch} isSearching={false} />
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-100 pb-6">
+                  <div>
+                    <h2 className="font-serif text-3xl md:text-4xl text-leroy-black mb-2">Propiedades Destacadas</h2>
+                    <p className="text-gray-500 font-light">Oportunidades únicas seleccionadas por nuestros expertos.</p>
+                  </div>
+                  <div className="flex items-center space-x-2 mt-4 md:mt-0">
+                     <button onClick={() => handleNavigate('listing', 'Bienes Raíces')} className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70 transition-opacity">
+                        Ver cartera completa &rarr;
+                     </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                  {properties
+                    .filter(p => p.status !== 'paused')
+                    .slice(0, 6)
+                    .map(property => (
+                    <div key={property.id} className="h-full">
+                      <PropertyCard 
+                        property={property} 
+                        onClick={() => handlePropertyClick(property)} 
+                      />
+                    </div>
+                  ))}
+                </div>
+            </div>
 
-  // --- Lógica de Filtrado de Propiedades ---
-  const getFilteredProperties = () => {
-    let filtered = properties;
+            <section className="bg-leroy-black text-white py-24 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-64 h-64 bg-leroy-gold opacity-10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+               <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+                  <span className="text-leroy-gold text-xs font-bold uppercase tracking-[0.2em] mb-4 block">Gestión de Venta Exclusiva</span>
+                  <h2 className="font-serif text-3xl md:text-5xl mb-6 leading-tight">¿Posee una propiedad extraordinaria?</h2>
+                  <p className="font-prata text-lg text-gray-300 mb-10 leading-relaxed max-w-2xl mx-auto">En LeRoy Residence, sabemos que su propiedad no es solo un inmueble, es un legado. Garantizamos confidencialidad absoluta, estrategia de precio experta y acceso a una cartera global.</p>
+                  <div className="flex flex-col md:flex-row justify-center gap-4">
+                     <button className="bg-leroy-gold text-white px-10 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white hover:text-leroy-black transition-colors duration-300 border border-leroy-gold">Solicitar Evaluación Privada</button>
+                  </div>
+               </div>
+            </section>
 
-    // Aplicar filtro de publicación: Si NO estamos en admin, solo mostrar publicadas
-    if (currentView !== 'admin') {
-        filtered = filtered.filter(p => p.isPublished);
-    }
+            <section className="py-20 bg-white">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="text-center mb-16">
+                      <h2 className="font-serif text-3xl md:text-4xl text-leroy-black mb-4">Excelencia Comprobada</h2>
+                      <div className="w-24 h-1 bg-leroy-gold mx-auto"></div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">+15</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Años de Experiencia</div>
+                       </div>
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">98%</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Tasa de Cierre</div>
+                       </div>
+                       <div className="px-4 py-4">
+                            <div className="font-serif text-5xl md:text-6xl text-leroy-black mb-2">24/7</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Atención Personalizada</div>
+                       </div>
+                  </div>
+              </div>
+            </section>
 
-    // ... (resto de la lógica de filtrado por categoría y filtros de búsqueda) ...
-    if (selectedCategory && selectedCategory !== 'Resultados de Búsqueda') {
-      if (selectedCategory === 'Bienes Raíces' || selectedCategory === 'Desarrollos') {
-        // No hay filtro de categoría, solo se usan los filtros de búsqueda si existen
-      } else if (selectedCategory === 'Premium Property') {
-          filtered = filtered.filter(p => p.isPremium);
-      } else {
-        filtered = filtered.filter(p => p.location.includes(selectedCategory));
-      }
-    }
+            <section className="bg-gray-50 py-20">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                  <div className="order-2 md:order-1 relative">
+                    <div className="absolute -top-4 -left-4 w-full h-full border-2 border-leroy-black/10 z-0"></div>
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop" alt="Luxury Living" className="w-full h-auto shadow-xl relative z-10"/>
+                  </div>
+                  <div className="order-1 md:order-2">
+                    <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-2 block">Filosofía LeRoy</span>
+                    <h3 className="font-serif text-3xl md:text-4xl mb-6 text-leroy-black">Más que una propiedad, un legado.</h3>
+                    <button onClick={() => handleNavigate('listing', 'Bienes Raíces')} className="inline-block border-b border-leroy-black pb-1 text-sm font-bold uppercase tracking-widest hover:text-leroy-gold hover:border-leroy-gold transition-colors">Comenzar la búsqueda</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        );
+      
+      case 'listing':
+        return (
+          <ListingView 
+            category={selectedCategory} 
+            properties={getFilteredProperties()} 
+            onPropertyClick={handlePropertyClick}
+            onGoHome={() => handleNavigate('home')}
+            onClearFilters={() => handleNavigate('listing', 'Bienes Raíces')}
+          />
+        );
 
-    if (searchFilters) {
-      if (searchFilters.location) {
-        filtered = filtered.filter(p => p.location.includes(searchFilters.location));
-      }
-      if (searchFilters.bedrooms !== 'any') {
-        const minBeds = parseInt(searchFilters.bedrooms);
-        filtered = filtered.filter(p => p.bedrooms >= minBeds);
-      }
-      if (searchFilters.priceRange !== 'any') {
-        const [minStr, maxStr] = searchFilters.priceRange.split('-');
-        let min = parseInt(minStr);
-        let max = maxStr === 'plus' ? Number.MAX_SAFE_INTEGER : parseInt(maxStr);
+      case 'detail':
+        return selectedProperty ? (
+          <PropertyDetailView 
+            property={selectedProperty} 
+            onGoHome={() => handleNavigate('home')}
+          />
+        ) : null;
+      
+      case 'showroom':
+        return <ShowroomView onGoHome={() => handleNavigate('home')} />;
+      
+      case 'admin':
+        return (
+          <AdminView 
+            onAddProperty={handleAddProperty} 
+            onCancel={() => handleNavigate('home')} 
+            properties={properties}
+            onUpdateProperty={handleUpdateProperty}
+          />
+        );
 
-        filtered = filtered.filter(p => {
-            let priceInCLP = 0;
-            const currency = p.currency.trim();
-            
-            // Convertimos el precio a CLP para el filtro
-            if (currency === 'UF') priceInCLP = p.price * UF_VALUE_CLP;
-            else if (currency === '$' || currency === 'USD') priceInCLP = p.price * 950;
-            else if (currency === '€') priceInCLP = p.price * 1020;
-            else priceInCLP = p.price; 
-            
-            return priceInCLP >= min && priceInCLP <= max;
-        });
-      }
-    }
+      default:
+        return <div>Página no encontrada</div>;
+    }
+  };
 
-    return filtered;
-  };
-  // --- Fin Lógica de Filtrado ---
-
-  // --- LÓGICA DE RENDERIZADO (Con manejo de carga) ---
-  const renderContent = () => {
-    if (isLoading && currentView !== 'admin') {
-      return <p className="text-center mt-32 text-xl text-gray-700">Cargando propiedades...</p>;
-    }
-    
-    const filteredProperties = getFilteredProperties();
-    
-    switch (currentView) {
-      case 'home':
-        return (
-          <>
-            <Hero onSearch={handleHeroSearch} onNavigate={handleNavigate} />
-            <div className="bg-white py-12">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-serif text-leroy-black mb-8 text-center">Propiedades Destacadas</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {filteredProperties
-                    .filter(p => p.isPremium && p.isPublished)
-                    .slice(0, 3)
-                    .map(property => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property} 
-                        onClick={() => handlePropertyClick(property)}
-                      />
-                    ))}
-                </div>
-                {filteredProperties.length === 0 && (
-                  <p className="text-center text-gray-500 mt-4">No hay propiedades destacadas disponibles.</p>
-                )}
-              </div>
-            </div>
-          </>
-        );
-
-      case 'listing':
-        return (
-          <ListingView 
-            properties={filteredProperties} 
-            category={selectedCategory}
-            searchFilters={searchFilters}
-            onPropertyClick={handlePropertyClick} 
-            onNavigate={handleNavigate}
-          />
-        );
-
-      case 'detail':
-        if (!selectedProperty) return <p className="text-center mt-20">Propiedad no encontrada.</p>;
-        return (
-          <PropertyDetailView 
-            property={selectedProperty} 
-            onNavigate={handleNavigate} 
-          />
-        );
-
-      case 'showroom':
-        // CORRECCIÓN: Se usa onGoHome en lugar de onNavigate para ShowroomView
-        return <ShowroomView onGoHome={() => handleNavigate('home')} />;
-
-      case 'admin':
-        return (
-          <AdminView 
-            properties={properties} // Pasar todas las propiedades, incluyendo borradores
-            onAddProperty={handleAddProperty} 
-            onUpdateProperty={handleUpdateProperty} 
-            onDeleteProperty={handleDeleteProperty} 
-            onCancel={() => handleNavigate('home')} 
-          />
-        );
-
-      default:
-        return (
-          <div className="text-center mt-32 h-64">
-            <h1 className="text-4xl font-serif text-red-600">404</h1>
-            <p className="text-gray-600">Vista no encontrada.</p>
-            <button onClick={() => handleNavigate('home')} className="mt-4 text-leroy-black hover:underline">
-              Volver al Inicio
-            </button>
-          </div>
-        );
-    }
-  };
-  // --- FIN LÓGICA DE RENDERIZADO ---
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header currentView={currentView} onNavigate={handleNavigate} />
-      <main className="flex-grow">
-        {renderContent()}
-      </main>
-      <Footer onNavigate={handleNavigate} />
-    </div>
-  );
+  return (
+    <div className="min-h-screen bg-white flex flex-col font-sans">
+      <Header currentView={currentView} onNavigate={handleNavigate} />
+      <main className="flex-grow">
+        {renderContent()}
+      </main>
+      <Footer onNavigate={(view, category) => handleNavigate(view, category)} />
+    </div>
+  );
 };
 
 export default App;
