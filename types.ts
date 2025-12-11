@@ -44,3 +44,5 @@ export interface SearchFilters {
 export interface HeroSearchState {
   location: string;
   bedrooms: string;
+  priceRange: string;
+}
