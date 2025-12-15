@@ -2,7 +2,10 @@
 export default {
   content: [
     "./index.html",
-    "./**/*.{js,ts,jsx,tsx}",
+    "./App.tsx",
+    "./index.tsx",
+    "./components/**/*.{ts,tsx}",
+    "./services/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
@@ -16,7 +19,7 @@ export default {
         'leroy-black': '#1a1a1a',
         'leroy-gold': '#d4af37',
         'leroy-gray': '#f5f5f5',
-      }
+      },
     },
   },
   plugins: [],
