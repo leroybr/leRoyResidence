@@ -33,7 +33,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               Excelencia, discreción y resultados excepcionales.
             </p>
             <div className="flex space-x-4">
-              {/* Social Icons Placeholders */}
               <div className="w-8 h-8 bg-white/10 flex items-center justify-center rounded-full hover:bg-leroy-gold cursor-pointer transition-colors" aria-label="Instagram">IG</div>
               <div className="w-8 h-8 bg-white/10 flex items-center justify-center rounded-full hover:bg-leroy-gold cursor-pointer transition-colors" aria-label="LinkedIn">LI</div>
             </div>
@@ -50,7 +49,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Links Column 2: Owners (Sellers - New Section) */}
+          {/* Links Column 2: Owners (Sellers) */}
           <div>
              <h4 className="font-sans text-xs font-bold uppercase tracking-widest text-leroy-gold mb-6">Propietarios</h4>
             <ul className="space-y-4 text-sm text-gray-300 font-light">
@@ -89,4 +88,20 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
         </div>
 
-        <div class
+        {/* Bottom Section */}
+        <div className="mt-16 pt-8 border-t border-gray-900 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-gray-500 text-xs mb-4 md:mb-0">
+            © {new Date().getFullYear()} LeRoy Residence. Todos los derechos reservados.
+          </p>
+          <div className="flex space-x-6 text-xs text-gray-500">
+            <button className="hover:text-white transition-colors">Privacidad</button>
+            <button className="hover:text-white transition-colors">Términos</button>
+            <button className="hover:text-white transition-colors">Cookies</button>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
