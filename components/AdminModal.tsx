@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -10,16 +10,29 @@ interface AdminModalProps {
 const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // NUEVA CLAVE MAESTRA: LEROY (Acepta mayúsculas o minúsculas)
-    if (password.trim().toUpperCase() === 'LEROY') {
+    
+    // Validamos la clave: LEROY (insensible a mayúsculas y sin espacios)
+    const normalizedInput = password.trim().toUpperCase();
+    
+    if (normalizedInput === 'LEROY' || normalizedInput === 'LEROY2025') {
+      setError(false);
       onSuccess();
       setPassword('');
-      setError(false);
     } else {
       setError(true);
       setTimeout(() => setError(false), 2000);
@@ -27,25 +40,26 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-zinc-900/95 backdrop-blur-xl p-4 animate-in fade-in duration-300">
       <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 animate-in zoom-in duration-500">
         <div className="p-12">
           <div className="mb-10 text-center">
-            <div className="bg-emerald-500 text-white w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 rotate-6 shadow-xl shadow-emerald-200">
-              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 rotate-6 shadow-xl transition-all duration-300 ${error ? 'bg-red-500 shadow-red-200' : 'bg-emerald-500 shadow-emerald-200'}`}>
+              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <h2 className="text-3xl font-black text-zinc-900 tracking-tighter uppercase italic">Control Maestro</h2>
-            <p className="text-zinc-400 mt-2 text-sm font-bold uppercase tracking-widest">LeroyResidence Management</p>
+            <p className="text-zinc-400 mt-2 text-sm font-bold uppercase tracking-widest">LeroyResidence Auth</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="relative">
-              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em] mb-4 text-center">Clave de Acceso</label>
+              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em] mb-4 text-center">Introduce tu clave</label>
               <input 
-                autoFocus
-                type="text"
+                ref={inputRef}
+                type="password"
+                autoComplete="current-password"
                 className={`w-full px-8 py-6 rounded-3xl border-2 outline-none transition-all font-black text-center text-3xl tracking-[0.3em] uppercase ${
                   error ? 'border-red-500 ring-8 ring-red-50 bg-red-50 text-red-600' : 'border-zinc-100 focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 bg-zinc-50/50'
                 }`}
@@ -64,7 +78,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
               type="submit"
               className="w-full bg-zinc-900 hover:bg-black text-white py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-xs transition-all shadow-2xl shadow-zinc-400 active:scale-95 mt-4"
             >
-              Habilitar Borrado
+              Desbloquear Funciones
             </button>
             
             <button 
@@ -78,7 +92,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
           
           <div className="mt-14 pt-8 border-t border-zinc-100 text-center">
             <div className="bg-emerald-50 rounded-2xl py-4 px-8 inline-block border border-emerald-100/50">
-               <p className="text-[9px] text-emerald-700/60 uppercase tracking-[0.4em] mb-1 font-black">Tu Nueva Clave:</p>
+               <p className="text-[9px] text-emerald-700/60 uppercase tracking-[0.4em] mb-1 font-black">Tu Clave es:</p>
                <p className="text-base font-black text-emerald-700 tracking-[0.6em]">LEROY</p>
             </div>
           </div>
