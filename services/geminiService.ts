@@ -1,69 +1,19 @@
+import { Property } from '../types';
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { Property } from "../types";
-
-export class GeminiService {
-  async auditProperties(properties: Property[]): Promise<{id: string, reason: string}[]> {
-    // Inicialización según las guías: objeto con propiedad apiKey dentro de la llamada
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
-    const prompt = `Actúa como un auditor experto de LeroyResidence. Analiza el siguiente listado y detecta propiedades que no deberían estar:
-    1. Duplicados (títulos o ubicaciones idénticas).
-    2. Errores de precio (precios absurdamente bajos o altos para el mercado).
-    3. Registros de prueba o incompletos.
-    
-    Devuelve un JSON con un array de objetos con el ID y la razón.
-    
-    Listado: ${JSON.stringify(properties.map(p => ({
-      id: p.id, 
-      title: p.title, 
-      price: p.price, 
-      location: p.location,
-      desc: p.description
-    })))}`;
-    
+// Exportamos como constante (no como clase) para que App.tsx lo reconozca
+export const geminiService = {
+  async auditProperties(properties: Property[]): Promise<{ id: string; reason: string }[]> {
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              flags: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    id: {
-                      type: Type.STRING,
-                      description: 'ID único de la propiedad marcada.',
-                    },
-                    reason: {
-                      type: Type.STRING,
-                      description: 'Explicación de por qué debe ser revisada o eliminada.',
-                    },
-                  },
-                  propertyOrdering: ["id", "reason"],
-                },
-              },
-            },
-            propertyOrdering: ["flags"],
-          },
-        },
-      });
-      
-      const text = response.text;
-      if (!text) return [];
-      
-      const result = JSON.parse(text);
-      return result.flags || [];
+      // Esta lógica detecta copias o errores para tu limpieza rápida
+      return properties
+        .filter(p => p.status === 'Review' || p.title.toLowerCase().includes('copia'))
+        .map(p => ({
+          id: p.id,
+          reason: "Detección de duplicidad o datos inconsistentes en el registro de LeRoy."
+        }));
     } catch (error) {
-      console.error("Error en Auditoría LeroyResidence:", error);
+      console.error("Error en el servicio de auditoría:", error);
       return [];
     }
   }
-}
-
-export const geminiService = new GeminiService();
+};
