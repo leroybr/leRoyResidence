@@ -11,6 +11,9 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
   const [error, setError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // CLAVE MAESTRA (La mantengo aquí para que sea fácil de editar para ti)
+  const MASTER_KEY = 'LEROY2026';
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       const timer = setTimeout(() => {
@@ -25,15 +28,17 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // VALIDACIÓN: LEROY2026
+    // Normalizamos la entrada: quitamos espacios y pasamos a mayúsculas
+    // Esto evita que el admin falle por un error de teclado
     const normalizedInput = password.trim().toUpperCase();
     
-    if (normalizedInput === 'LEROY2026') { 
+    if (normalizedInput === MASTER_KEY) { 
       setError(false);
-      onSuccess();
+      onSuccess(); // Esto llama a setAuthMode('Admin') en tu App.tsx
       setPassword('');
     } else {
       setError(true);
+      // Feedback visual de error por 2 segundos
       setTimeout(() => setError(false), 2000);
     }
   };
@@ -43,6 +48,7 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
       <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden border border-zinc-200 animate-in zoom-in duration-500">
         <div className="p-12">
           <div className="mb-10 text-center">
+            {/* El icono cambia de color si hay error */}
             <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 rotate-6 shadow-xl transition-all duration-300 ${error ? 'bg-red-500 shadow-red-200' : 'bg-emerald-500 shadow-emerald-200'}`}>
               <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -64,7 +70,10 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
                 }`}
                 placeholder="••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(false);
+                }}
               />
               {error && (
                 <div className="absolute -bottom-10 left-0 right-0 text-center">
