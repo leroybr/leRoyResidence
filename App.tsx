@@ -1,4 +1,5 @@
- import React, { useState, useMemo, useEffect } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { Property, AuthMode } from './types';
 import { geminiService } from './services/geminiService';
 import AdminModal from './components/AdminModal';
@@ -279,4 +280,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-;
