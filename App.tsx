@@ -1,21 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-client';
-import { Property, AuthMode } from './types';
 import AdminModal from './components/AdminModal';
 
-// CONEXIÓN OFICIAL LEROY RESIDENCE
+// --- CONFIGURACIÓN DE CONEXIÓN ---
 const SUPABASE_URL = "https://xocgjxaofsuoeqetsfld.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_qOd-xIW-C5HkcUHNApP3bw_PFTanZdh";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const App: React.FC = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [authMode, setAuthMode] = useState<AuthMode>('Standard');
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false); // Modo Admin Activado/Desactivado
+  const [showAdminPanel, setShowAdminPanel] = useState(false); // Ver Biblioteca o Web
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Carga los datos desde Supabase
   useEffect(() => {
     fetchProperties();
   }, []);
@@ -26,108 +25,145 @@ const App: React.FC = () => {
       .from('properties')
       .select('*')
       .order('created_at', { ascending: false });
-    
-    if (!error && data) {
-      setProperties(data);
-    }
+    if (!error && data) setProperties(data);
     setLoading(false);
   };
 
-  const filtered = useMemo(() => {
-    return properties.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           p.location.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Si eres Admin ves TODO. Si eres público, solo lo "Published"
-      if (authMode === 'Admin') return matchesSearch;
-      return matchesSearch && p.status === 'Published';
-    });
-  }, [properties, searchTerm, authMode]);
-
-  const toggleStatus = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'Published' ? 'Draft' : 'Published';
-    const { error } = await supabase.from('properties').update({ status: newStatus }).eq('id', id);
-    if (!error) fetchProperties();
-  };
-
   const handleDelete = async (id: string) => {
-    if (confirm('¿Deseas eliminar permanentemente este registro de LeroyResidence?')) {
-      const { error } = await supabase.from('properties').delete().eq('id', id);
-      if (!error) fetchProperties();
+    if (confirm('¿Eliminar de la base de datos de Leroy Residence?')) {
+      await supabase.from('properties').delete().eq('id', id);
+      fetchProperties();
     }
   };
 
-  return (
-    <div className="min-h-screen bg-white font-sans text-zinc-900">
-      {/* NAVBAR ORIGINAL */}
-      <nav className="h-24 px-10 flex items-center justify-between border-b border-zinc-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
-        <span className="text-2xl font-black tracking-tighter italic uppercase">LEROY RESIDENCE</span>
-        <div className="flex gap-6 items-center">
-          <input 
-            type="text" 
-            placeholder="BUSCAR PROPIEDAD..." 
-            className="bg-zinc-100 px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest outline-none focus:ring-1 focus:ring-zinc-400"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+  const filtered = useMemo(() => {
+    return properties.filter(p => 
+      p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.location.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [properties, searchTerm]);
+
+  // --- VISTA 1: BIBLIOTECA DE PROPIEDADES (ADMIN) ---
+  if (isAdmin && showAdminPanel) {
+    return (
+      <div className="min-h-screen bg-zinc-50 flex">
+        {/* Barra Lateral Izquierda */}
+        <aside className="w-80 bg-white border-r border-zinc-200 p-10 flex flex-col sticky top-0 h-screen">
+          <div className="mb-12">
+            <span className="text-2xl font-black italic tracking-tighter uppercase">LeR <span className="text-emerald-600">Admin</span></span>
+          </div>
+          <nav className="space-y-4 flex-1">
+            <button className="w-full text-left font-black text-[10px] uppercase tracking-widest bg-zinc-900 text-white p-4 rounded-2xl">Inventario Central</button>
+            <button className="w-full text-left font-black text-[10px] uppercase tracking-widest text-zinc-400 p-4 hover:bg-zinc-100 rounded-2xl transition-all">Auditoría IA</button>
+          </nav>
           <button 
-            onClick={() => authMode === 'Admin' ? setAuthMode('Standard') : setIsAdminModalOpen(true)}
-            className="bg-zinc-900 text-white px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] hover:bg-black transition-all"
+            onClick={() => setShowAdminPanel(false)} 
+            className="text-zinc-900 font-black text-[10px] uppercase tracking-widest border-2 border-zinc-900 p-4 rounded-2xl hover:bg-zinc-900 hover:text-white transition-all"
           >
-            {authMode === 'Admin' ? 'SALIR' : 'INGRESAR'}
+            ← Volver a la Web
           </button>
+        </aside>
+
+        {/* Contenido Principal de la Biblioteca */}
+        <main className="flex-1 p-12 overflow-y-auto">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h1 className="text-5xl font-black italic tracking-tighter uppercase">Biblioteca</h1>
+              <p className="text-zinc-400 font-bold uppercase text-[10px] tracking-[0.3em] mt-2">Gestión masiva de activos</p>
+            </div>
+            <div className="flex gap-4">
+              <input 
+                placeholder="BUSCAR..." 
+                className="bg-white border px-6 py-3 rounded-2xl text-xs font-bold uppercase outline-none focus:ring-2 ring-emerald-500"
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[3rem] border border-zinc-100 shadow-xl overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-zinc-50 border-b border-zinc-100">
+                  <th className="p-8 text-[10px] font-black uppercase tracking-widest">Propiedad</th>
+                  <th className="p-8 text-[10px] font-black uppercase tracking-widest">Ubicación</th>
+                  <th className="p-8 text-[10px] font-black uppercase tracking-widest">Precio</th>
+                  <th className="p-8 text-[10px] font-black uppercase tracking-widest text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(p => (
+                  <tr key={p.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                    <td className="p-8 flex items-center gap-4">
+                      <img src={p.imageUrl} className="w-12 h-12 rounded-xl object-cover" />
+                      <span className="font-black uppercase text-sm">{p.title}</span>
+                    </td>
+                    <td className="p-8 text-zinc-400 font-bold text-xs uppercase">{p.location}</td>
+                    <td className="p-8 font-black text-sm italic">UF {Number(p.price).toLocaleString()}</td>
+                    <td className="p-8 text-right">
+                      <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:bg-red-50 p-3 rounded-xl transition-colors">🗑</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // --- VISTA 2: WEB PÚBLICA (LEROY RESIDENCE) ---
+  return (
+    <div className="min-h-screen bg-black text-white font-sans">
+      <nav className="p-10 flex justify-between items-center border-b border-zinc-800 bg-black/90 backdrop-blur-md sticky top-0 z-50">
+        <span className="text-3xl font-black italic tracking-tighter uppercase leading-none">LEROY <span className="text-zinc-600">RESIDENCE</span></span>
+        <div className="flex gap-6 items-center">
+          {isAdmin ? (
+            <button 
+              onClick={() => setShowAdminPanel(true)} 
+              className="bg-white text-black px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all"
+            >
+              Entrar a Biblioteca
+            </button>
+          ) : (
+            <button 
+              onClick={() => setShowLoginModal(true)} 
+              className="border border-zinc-700 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+            >
+              Ingresar Admin
+            </button>
+          )}
         </div>
       </nav>
 
-      <main className="p-10 max-w-[1600px] mx-auto">
-        {loading ? (
-          <div className="py-40 text-center text-[10px] font-black uppercase tracking-[0.5em] text-zinc-300">Cargando Galería Privada...</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
-            {filtered.map(p => (
-              <div key={p.id} className="group">
-                <div className="aspect-[4/5] overflow-hidden bg-zinc-100 mb-8 relative shadow-sm">
-                  <img src={p.imageUrl} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105" alt={p.title} />
-                  
-                  {/* Etiqueta de Estado solo para el Admin */}
-                  {authMode === 'Admin' && (
-                    <div className="absolute top-6 left-6 flex gap-2">
-                      <span className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest ${p.status === 'Published' ? 'bg-white text-emerald-600' : 'bg-zinc-900 text-white'}`}>
-                        {p.status === 'Published' ? 'Visible' : 'Oculto'}
-                      </span>
-                    </div>
-                  )}
+      <main className="p-10 max-w-[1400px] mx-auto">
+        <header className="py-20 text-center">
+          <h2 className="text-7xl font-black italic uppercase tracking-tighter mb-4 leading-none">Exclusividad en<br/>cada detalle</h2>
+          <p className="text-zinc-500 tracking-[0.5em] uppercase text-xs">Concepción • Santiago • Marbella</p>
+        </header>
 
-                  {/* Controles de Admin sobre la foto */}
-                  {authMode === 'Admin' && (
-                    <div className="absolute bottom-6 left-6 right-6 flex gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                      <button onClick={() => toggleStatus(p.id, p.status)} className="flex-1 bg-white/90 backdrop-blur-md py-3 text-[9px] font-black uppercase tracking-widest hover:bg-white">
-                        {p.status === 'Published' ? 'Ocultar' : 'Publicar'}
-                      </button>
-                      <button onClick={() => handleDelete(p.id)} className="bg-red-600 text-white px-4 py-3 hover:bg-red-700">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between items-end">
-                    <h3 className="font-black text-lg uppercase tracking-tighter leading-none">{p.title}</h3>
-                    <p className="font-black text-lg tracking-tighter italic">UF {p.price.toLocaleString()}</p>
-                  </div>
-                  <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-[0.2em]">{p.location}</p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          {filtered.map(p => (
+            <div key={p.id} className="group cursor-pointer">
+              <div className="aspect-[4/5] overflow-hidden mb-6 relative grayscale group-hover:grayscale-0 transition-all duration-700">
+                <img src={p.imageUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               </div>
-            ))}
-          </div>
-        )}
+              <div className="flex justify-between items-end">
+                <div>
+                  <h3 className="font-black text-xl uppercase tracking-tighter leading-none mb-1">{p.title}</h3>
+                  <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">{p.location}</p>
+                </div>
+                <p className="font-black text-xl italic tracking-tighter">UF {Number(p.price).toLocaleString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
 
-      {/* Modal de Acceso */}
       <AdminModal 
-        isOpen={isAdminModalOpen} 
-        onClose={() => setIsAdminModalOpen(false)} 
-        onSuccess={() => { setAuthMode('Admin'); setIsAdminModalOpen(false); }} 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+        onSuccess={() => { setIsAdmin(true); setShowLoginModal(false); }} 
       />
     </div>
   );
