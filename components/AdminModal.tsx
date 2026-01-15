@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 
 interface AdminModalProps {
@@ -26,10 +25,10 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validamos la clave: LEROY (insensible a mayúsculas y sin espacios)
+    // VALIDACIÓN: LEROY2026
     const normalizedInput = password.trim().toUpperCase();
     
-    if (normalizedInput === 'LEROY' || normalizedInput === 'LEROY2025') {
+    if (normalizedInput === 'LEROY2026') { 
       setError(false);
       onSuccess();
       setPassword('');
@@ -89,13 +88,6 @@ const AdminModal: React.FC<AdminModalProps> = ({ isOpen, onClose, onSuccess }) =
               Cancelar Acceso
             </button>
           </form>
-          
-          <div className="mt-14 pt-8 border-t border-zinc-100 text-center">
-            <div className="bg-emerald-50 rounded-2xl py-4 px-8 inline-block border border-emerald-100/50">
-               <p className="text-[9px] text-emerald-700/60 uppercase tracking-[0.4em] mb-1 font-black">Tu Clave es:</p>
-               <p className="text-base font-black text-emerald-700 tracking-[0.6em]">LEROY</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
