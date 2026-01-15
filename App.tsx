@@ -1,10 +1,9 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { Property, AuthMode } from './types';
 import { geminiService } from './services/geminiService';
 import AdminModal from './components/AdminModal';
 
-// --- Componentes Internos para Estabilidad (Evita errores de resolución de archivos) ---
+// --- Componentes Internos para Estabilidad ---
 
 const Navbar: React.FC<{ authMode: AuthMode; onAdminClick: () => void; onLogout: () => void }> = ({ authMode, onAdminClick, onLogout }) => (
   <nav className="bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-24 sticky top-0 z-50 px-10 flex items-center justify-between">
@@ -145,7 +144,7 @@ const App: React.FC = () => {
       setIsAdminModalOpen(true);
       return;
     }
-    if (confirm('¿Deseas eliminar permanentemente este registro de LeroyResidence?')) {
+    if (window.confirm('¿Deseas eliminar permanentemente este registro de LeroyResidence?')) {
       setProperties(prev => prev.filter(p => p.id !== id));
     }
   };
@@ -155,7 +154,7 @@ const App: React.FC = () => {
       setIsAdminModalOpen(true);
       return;
     }
-    if (confirm(`Se eliminarán las ${stats.flagged} propiedades marcadas como irregulares. ¿Confirmas la limpieza total?`)) {
+    if (window.confirm(`Se eliminarán las ${stats.flagged} propiedades marcadas como irregulares. ¿Confirmas la limpieza total?`)) {
       setProperties(prev => prev.filter(p => !p.aiFlag));
       setActiveTab('all');
     }
@@ -163,7 +162,7 @@ const App: React.FC = () => {
 
   const filtered = properties.filter(p => {
     const search = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                   p.location.toLowerCase().includes(searchTerm.toLowerCase());
+                  p.location.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (activeTab === 'audit') return search && !!p.aiFlag;
     if (activeTab === 'archived') return search && (p.status === 'Sold' || p.status === 'Archived');
@@ -189,7 +188,7 @@ const App: React.FC = () => {
                 type="text" 
                 placeholder="Buscar por nombre o zona..." 
                 value={searchTerm} 
-                onChange={e => setSearchTerm(e.target.value)} 
+                onChange={e => setSearchTerm(e.target.value)}
                 className="px-6 py-4 bg-white border border-zinc-200 rounded-3xl outline-none focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 flex-1 md:w-80 font-bold text-xs uppercase tracking-widest shadow-sm transition-all" 
               />
               <button 
