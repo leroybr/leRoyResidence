@@ -1,143 +1,262 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Property, AuthMode } from './types';
-import AdminModal from './components/AdminModal';
 
-const INITIAL_PROPERTIES: Property[] = [
-  { id: '1', title: 'Villa Mediterránea', price: 850000, location: 'San Pedro de la Paz', status: 'Available', imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80', description: 'Increíble villa con vistas al mar.', sqft: 250, rooms: 4 },
-  { id: '2', title: 'Piso Céntrico Lujo', price: 420000, location: 'Concepción', status: 'Available', imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80', description: 'Piso reformado en el centro.', sqft: 85, rooms: 2 },
-];
+import React, { useState, useEffect } from 'react';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import Footer from './components/Footer';
+import PropertyCard from './components/PropertyCard';
+import ListingView from './components/ListingView';
+import AdminView from './components/AdminView';
+import PropertyDetailView from './components/PropertyDetailView';
+import ShowroomView from './components/ShowroomView';
+import { MOCK_PROPERTIES } from './constants';
+import { Property, HeroSearchState } from './types';
+import { interpretSearchQuery } from './services/geminiService';
+
+type ViewState = 'home' | 'listing' | 'admin' | 'detail' | 'showroom';
+
+const UF_VALUE_CLP = 37800; // Consistent with PropertyCard
 
 const App: React.FC = () => {
-  const [properties, setProperties] = useState<Property[]>(() => {
-    const saved = localStorage.getItem('leroy_properties');
-    return saved ? JSON.parse(saved) : INITIAL_PROPERTIES;
-  });
+  const [properties, setProperties] = useState<Property[]>(MOCK_PROPERTIES);
+  const [displayedProperties, setDisplayedProperties] = useState<Property[]>(MOCK_PROPERTIES); 
+  const [isSearching, setIsSearching] = useState(false);
   
-  const [authMode, setAuthMode] = useState<AuthMode>('Standard');
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  // Navigation State
+  const [currentView, setCurrentView] = useState<ViewState>('home');
+  const [currentCategory, setCurrentCategory] = useState<string>('');
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
 
-  // Sincronizar con LocalStorage
+  // Sync initial MOCK properties to displayed
   useEffect(() => {
-    localStorage.setItem('leroy_properties', JSON.stringify(properties));
-  }, [properties]);
+     if (currentView === 'home' && !isSearching) {
+        setDisplayedProperties(properties);
+     }
+  }, [properties, currentView, isSearching]);
 
-  // FUNCIONES DE GESTIÓN
-  const addProperty = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newProp: Property = {
-      id: Date.now().toString(),
-      title: formData.get('title') as string,
-      price: Number(formData.get('price')),
-      location: formData.get('location') as string,
-      status: 'Available',
-      imageUrl: formData.get('image') as string || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=800',
-      description: '', sqft: 0, rooms: 0
-    };
-    setProperties([...properties, newProp]);
-    setShowAddForm(false);
+  const handleSearch = async (filters: HeroSearchState) => {
+    const { location, bedrooms, priceRange } = filters;
+
+    // 1. If nothing selected, go home or stay home
+    if (!location && bedrooms === 'any' && priceRange === 'any') {
+      handleNavigate('home');
+      return;
+    }
+    
+    // 2. Optimization: If ONLY location is selected (no specific beds/price), 
+    // treat it exactly like clicking the city name in the menu.
+    if (location && bedrooms === 'any' && priceRange === 'any') {
+        handleNavigate(location);
+        return;
+    }
+
+    // 3. Complex Search (Location + Beds + Price)
+    setCurrentView('listing');
+    setIsSearching(true);
+
+    // Create a readable title for the results page
+    let titleParts = [];
+    if (location) titleParts.push(location);
+    if (bedrooms !== 'any') titleParts.push(`${bedrooms}+ Dorm`);
+    if (priceRange !== 'any') titleParts.push('Precio Filtrado');
+    
+    // Set the category title to the search terms
+    const searchTitle = titleParts.length > 0 ? titleParts.join(', ') : 'Resultados de Búsqueda';
+    setCurrentCategory(searchTitle);
+
+    let filtered = properties;
+
+    // Filter by Location
+    if (location.trim()) {
+        filtered = filtered.filter(p => 
+            p.location.toLowerCase().includes(location.toLowerCase()) ||
+            p.title.toLowerCase().includes(location.toLowerCase())
+        );
+    }
+
+    // Filter by Bedrooms
+    if (bedrooms !== 'any') {
+        const minBeds = parseInt(bedrooms);
+        filtered = filtered.filter(p => p.bedrooms >= minBeds);
+    }
+
+    // Filter by Price
+    if (priceRange !== 'any') {
+        const [minStr, maxStr] = priceRange.split('-');
+        let min = parseInt(minStr);
+        let max = maxStr === 'plus' ? Number.MAX_SAFE_INTEGER : parseInt(maxStr);
+
+        filtered = filtered.filter(p => {
+            let priceInCLP = 0;
+            const currency = p.currency.trim();
+            
+            // Normalize everything to CLP for comparison
+            if (currency === 'UF') {
+                priceInCLP = p.price * UF_VALUE_CLP;
+            } else if (currency === '$' || currency === 'USD') {
+                priceInCLP = p.price * 950; 
+            } else if (currency === '€') {
+                priceInCLP = p.price * 1020; 
+            } else {
+                priceInCLP = p.price; 
+            }
+            return priceInCLP >= min && priceInCLP <= max;
+        });
+    }
+
+    // (Optional) Gemini AI hook for natural language, not used in structured search
+    if (location.split(' ').length > 3) {
+         const aiFilters = await interpretSearchQuery(location);
+    }
+
+    setDisplayedProperties(filtered);
+    setIsSearching(false);
   };
 
-  const toggleStatus = (id: string) => {
-    setProperties(properties.map(p => 
-      p.id === id ? { ...p, status: p.status === 'Available' ? 'Archived' : 'Available' } : p
-    ));
-  };
+  const handleNavigate = (pageId: string) => {
+    window.scrollTo(0, 0);
+    
+    if (pageId === 'admin') {
+      setCurrentView('admin');
+      return;
+    }
 
-  const deleteProperty = (id: string) => {
-    if (confirm('¿Eliminar definitivamente?')) {
-      setProperties(properties.filter(p => p.id !== id));
+    if (pageId === 'home') {
+      setCurrentView('home');
+      setDisplayedProperties(properties);
+      setCurrentCategory('');
+      return;
+    }
+
+    if (pageId === 'showroom_kitchens') {
+      setCurrentView('showroom');
+      return;
+    }
+
+    setCurrentView('listing');
+    setCurrentCategory(pageId);
+
+    if (pageId === 'real_estate' || pageId === 'developments') {
+       // Show all properties or specific ones.
+       setDisplayedProperties(properties);
+    } else if (pageId === 'premium') {
+       // Premium Logic: Filter explicitly marked premium properties
+       const filtered = properties.filter(p => p.isPremium);
+       setDisplayedProperties(filtered);
+    } else {
+       // It's a location/commune
+       // We filter loosely to match "Concepción" in "Concepción, Chile"
+       const filtered = properties.filter(p => 
+         p.location.toLowerCase().includes(pageId.toLowerCase())
+       );
+       setDisplayedProperties(filtered);
     }
   };
 
-  const filtered = properties.filter(p => {
-    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          p.location.toLowerCase().includes(searchTerm.toLowerCase());
-    // El público no ve las "Archived" (desactivadas)
-    if (authMode === 'Standard') return matchesSearch && p.status === 'Available';
-    return matchesSearch;
-  });
+  const handlePropertyClick = (id: string) => {
+    const property = properties.find(p => p.id === id);
+    if (property) {
+      setSelectedProperty(property);
+      setCurrentView('detail');
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handleAddProperty = (newProperty: Property) => {
+    const updatedProperties = [newProperty, ...properties];
+    setProperties(updatedProperties);
+    setDisplayedProperties(updatedProperties); 
+    handleNavigate('real_estate'); 
+  };
+
+  const clearFilters = () => {
+    handleNavigate('home');
+  };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-zinc-900">
-      {/* NAVBAR ORIGINAL */}
-      <nav className="fixed w-full z-50 flex justify-between items-center p-8 md:px-16 text-white mix-blend-difference">
-        <div className="text-3xl font-serif">LeRoy Residence</div>
-        <div className="flex gap-4">
-          {authMode === 'Admin' && (
-            <button onClick={() => setShowAddForm(true)} className="bg-emerald-600 px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest">+ Nueva Propiedad</button>
-          )}
-          <button 
-            onClick={() => authMode === 'Admin' ? setAuthMode('Standard') : setShowLoginModal(true)}
-            className="bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest"
-          >
-            {authMode === 'Admin' ? 'Salir Modo Maestro' : 'Ingresar'}
-          </button>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white flex flex-col font-sans">
+      <Header onNavigate={handleNavigate} currentView={currentView === 'detail' || currentView === 'showroom' ? 'listing' : currentView} />
+      
+      <main className="flex-grow">
+        
+        {currentView === 'admin' ? (
+          <AdminView onAddProperty={handleAddProperty} onCancel={() => handleNavigate('home')} />
+        ) : currentView === 'detail' && selectedProperty ? (
+          <PropertyDetailView property={selectedProperty} onGoHome={() => handleNavigate('home')} />
+        ) : currentView === 'showroom' ? (
+          <ShowroomView onGoHome={() => handleNavigate('home')} />
+        ) : currentView === 'home' ? (
+          <>
+            <Hero onSearch={handleSearch} isSearching={isSearching} />
 
-      {/* HERO SECTION (Mismo aspecto que tu imagen) */}
-      <header className="relative h-[90vh] flex items-center justify-center text-center px-4 overflow-hidden bg-zinc-900">
-        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1920" className="absolute inset-0 w-full h-full object-cover opacity-60" alt="" />
-        <div className="relative z-10 max-w-5xl">
-          <h1 className="text-white text-5xl md:text-7xl font-serif mb-12 leading-tight">Vende o compra tu propiedad con acompañamiento profesional y seguro.</h1>
-          <div className="bg-white rounded-full p-2 flex shadow-2xl max-w-3xl mx-auto">
-            <input type="text" placeholder="UBICACIÓN..." className="flex-1 px-8 py-4 outline-none rounded-full text-xs font-bold uppercase" onChange={(e) => setSearchTerm(e.target.value)} />
-            <button className="bg-zinc-900 text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Buscar</button>
-          </div>
-        </div>
-      </header>
-
-      {/* CATALOGO DE PROPIEDADES */}
-      <main className="max-w-[1400px] mx-auto py-24 px-8 md:px-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
-          {filtered.map(p => (
-            <div key={p.id} className={`group relative ${p.status === 'Archived' ? 'opacity-50' : ''}`}>
-              <div className="aspect-[4/5] overflow-hidden rounded-[2.5rem] shadow-xl mb-6 relative">
-                <img src={p.imageUrl} className="w-full h-full object-cover" alt="" />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+              
+              <div className="flex flex-col md:flex-row justify-between items-end mb-12 border-b border-gray-100 pb-6">
+                <div>
+                  <h2 className="font-serif text-3xl md:text-4xl text-leroy-black mb-2">
+                    Propiedades Destacadas
+                  </h2>
+                  <p className="text-gray-500 font-light">
+                    Una selección curada de las mejores residencias disponibles.
+                  </p>
+                </div>
                 
-                {/* CONTROLES MAESTROS (Solo visibles en Admin) */}
-                {authMode === 'Admin' && (
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                    <button onClick={() => toggleStatus(p.id)} className="bg-white p-4 rounded-full text-zinc-900 font-bold text-[10px] uppercase">
-                      {p.status === 'Available' ? 'Desactivar' : 'Activar'}
-                    </button>
-                    <button onClick={() => deleteProperty(p.id)} className="bg-red-600 p-4 rounded-full text-white font-bold text-[10px] uppercase">Eliminar</button>
-                  </div>
-                )}
-                {p.status === 'Archived' && <div className="absolute top-6 left-6 bg-zinc-900 text-white px-4 py-2 rounded-full text-[8px] font-black uppercase">Oculto al público</div>}
+                <div className="flex items-center space-x-2 mt-4 md:mt-0">
+                   <button 
+                     onClick={() => handleNavigate('real_estate')}
+                     className="text-xs font-bold uppercase tracking-widest text-leroy-black hover:opacity-70"
+                   >
+                     Ver todas las propiedades &rarr;
+                   </button>
+                </div>
               </div>
-              <h3 className="text-2xl font-serif italic">{p.title}</h3>
-              <p className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest mt-1">{p.location} • UF {p.price.toLocaleString()}</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                {properties.slice(0, 6).map(property => (
+                  <div key={property.id} className="h-full">
+                    <PropertyCard property={property} onClick={handlePropertyClick} />
+                  </div>
+                ))}
+              </div>
+
             </div>
-          ))}
-        </div>
+            
+            <section className="bg-gray-50 py-20">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                  <div className="order-2 md:order-1">
+                    <img 
+                      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2070&auto=format&fit=crop" 
+                      alt="Luxury Living" 
+                      className="w-full h-auto shadow-xl"
+                    />
+                  </div>
+                  <div className="order-1 md:order-2">
+                    <h3 className="font-serif text-3xl md:text-4xl mb-6">El arte de vivir bien.</h3>
+                    <p className="text-gray-500 leading-relaxed mb-8">
+                      En LeRoy Residence, entendemos que una casa es más que una estructura; es un estilo de vida. 
+                      Nuestro equipo de expertos selecciona meticulosamente cada propiedad para garantizar que cumpla 
+                      con los estándares más exigentes de calidad, ubicación y diseño.
+                    </p>
+                    <a href="#" className="inline-block border-b border-leroy-black pb-1 text-sm font-bold uppercase tracking-widest hover:opacity-50 transition-opacity">
+                      Leer nuestra revista
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </>
+        ) : (
+          <ListingView 
+            category={currentCategory} 
+            properties={displayedProperties} 
+            onClearFilters={clearFilters}
+            onPropertyClick={handlePropertyClick}
+            onGoHome={() => handleNavigate('home')}
+          />
+        )}
+
       </main>
-
-      {/* FORMULARIO PARA INGRESAR PROPIEDADES (MODAL) */}
-      {showAddForm && (
-        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6">
-          <form onSubmit={addProperty} className="bg-white w-full max-w-lg rounded-[3rem] p-12 space-y-6">
-            <h2 className="text-3xl font-serif italic text-center mb-8">Nueva Propiedad</h2>
-            <input name="title" placeholder="TÍTULO (EJ: VILLA MODERNA)" required className="w-full border-b-2 border-zinc-100 py-3 outline-none focus:border-emerald-500 font-bold uppercase text-xs" />
-            <input name="location" placeholder="UBICACIÓN (EJ: CHIGUAYANTE)" required className="w-full border-b-2 border-zinc-100 py-3 outline-none focus:border-emerald-500 font-bold uppercase text-xs" />
-            <input name="price" type="number" placeholder="PRECIO EN UF" required className="w-full border-b-2 border-zinc-100 py-3 outline-none focus:border-emerald-500 font-bold uppercase text-xs" />
-            <input name="image" placeholder="URL DE LA IMAGEN (OPCIONAL)" className="w-full border-b-2 border-zinc-100 py-3 outline-none focus:border-emerald-500 font-bold uppercase text-xs" />
-            <div className="flex gap-4 pt-6">
-              <button type="submit" className="flex-1 bg-zinc-900 text-white py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest">Guardar en Web</button>
-              <button type="button" onClick={() => setShowAddForm(false)} className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <AdminModal 
-        isOpen={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
-        onSuccess={() => { setAuthMode('Admin'); setShowLoginModal(false); }} 
-      />
+      <Footer />
     </div>
   );
 };
