@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
-# Run and deploy your AI Studio app
+# LeRoy Residence | Luxury Real Estate
 
-This contains everything you need to run your app locally.
+Una plataforma de bienes raíces de lujo inspirada en JamesEdition, diseñada para la Octava Región de Chile y el mercado internacional de alta gama.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1AtShvA0DbkqAAYRmW0pQBge2m0_7Rn3E
+## ✨ Características
 
-## Run Locally
+- **Diseño Ultra-Lujo:** Estética minimalista y refinada con tipografías serif y transiciones suaves.
+- **Búsqueda Inteligente (IA):** Integración con Google Gemini para interpretar búsquedas en lenguaje natural.
+- **Gestión de Propiedades:** Panel de administración para publicar nuevas fichas con datos públicos y privados.
+- **Showroom Interactivo:** Sección dedicada a tendencias de diseño y tecnologías de cocina (Showroom Cocinas).
+- **Responsive:** Totalmente optimizado para dispositivos móviles y escritorio.
 
-**Prerequisites:**  Node.js
+## 🛠️ Tecnologías
 
+- **Frontend:** React, TypeScript.
+- **Estilos:** Tailwind CSS.
+- **IA:** @google/genai (Gemini 3 Flash).
+- **Fuentes:** Google Fonts (Playfair Display, Manrope, Prata, Inter).
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🚀 Instalación y Uso
+
+1. Clona el repositorio.
+2. Instala las dependencias: `npm install`.
+3. Asegúrate de tener tu API Key de Google GenAI configurada en el entorno.
+4. Inicia el servidor de desarrollo: `npm run dev`.
+
+---
+*Viviendo lo Extraordinario.*
+#
